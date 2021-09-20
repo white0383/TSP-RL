@@ -60,6 +60,8 @@ int main(int argc, char** argv){
  *    https://redforce01.tistory.com/84
  *    mt19937 全域関数化
  *    https://stackoverflow.com/questions/33930182/using-same-random-number-generator-across-multiple-functions
+ * 
+ * yesyes
  */
 
   return 0;
