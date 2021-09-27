@@ -5,13 +5,14 @@
 #include <random> // should be replaced to <random>'s mt19937
 
 #include "RandomTour.h"
+#include "../../../helper/mt19937ar.h"
 #include "../../../model/Tour.h"
 #include "../../../model/Graph.h"
 
 using namespace std;
 
 Tour randomTour(const Graph& g){
-  mt19937 mtRand(rand()); // should be replaced to <random>'s mt19937
+  mt19937 mtRand(genrand_int32()); // should be replaced to <random>'s mt19937
 
   int cityNum = g.getNodesSize();
 

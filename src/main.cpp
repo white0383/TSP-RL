@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cstdlib> // should be replaced to <random>'s mt19937
 
 #include "./model/Graph.h"
 #include "./helper/FileIOHelper.h"
+#include "./helper/mt19937ar.h"
 #include "./solver/initial_solution/GenerateInitialSolution.h"
 #include "./solver/local_search/SearchLocalOpt.h"
 #include "./model/Tour.h"
@@ -23,7 +23,7 @@ int main(int argc, char** argv){
   // const long long TOTAL_ITERATION = LL_MAX;
 
   // Set seed of random number generator
-  srand(SEED); // should be replaced to <random>'s mt19937
+  init_genrand(SEED);
 
   //STEP1 : データの読み込み
   vector< vector <int> > nodes = readTSPFile(TSP_DATA_FILE);
@@ -54,7 +54,7 @@ int main(int argc, char** argv){
  * 6. Usage 作成
  * 7. main関数 try-catchにする
  * 8. 各部分に throw 作成
- * 9. cの性能低いrandを <random>の mt19937 の全域関数版にする
+ * (完了)9. cの性能低いrandを <random>の mt19937 の全域関数版にする
  *    mt19937 説明
  *    https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=devmachine&logNo=177685246
  *    https://redforce01.tistory.com/84

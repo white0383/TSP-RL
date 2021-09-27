@@ -1,4 +1,3 @@
-#include <cstdlib> // should be replaced to <random>'s mt19937
 #include <iostream>
 #include <vector>
 #include <cfloat> // DBL_MAX
@@ -108,7 +107,6 @@ Tour TwoOpt(const Graph& g, Tour& pi){
   int cityNum = pi.getSize();
   bool improved = true;
 
-  int debugPara = 0;
   while(improved){
     improved = false;
     for(int i=1; i < cityNum-1 ; i++){
