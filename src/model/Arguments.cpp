@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#define STRINUM 3
+#define STRINUM 4
 #define INTENUM 5
 #define REALNUM 3
 
@@ -26,6 +26,7 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
     this->TSP_DATA_FILE = stringArgs[0];
     this->INIT_SOLUTION_METHOD = stringArgs[1];
     this->LOCAL_SEARCH_METHOD = stringArgs[2];
+    this->TERMINATE_METHOD = stringArgs[3];
 
     this->SEED = integerArgs[0];
     this->T = integerArgs[1];

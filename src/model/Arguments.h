@@ -17,11 +17,14 @@ class Arguments {
     string TSP_DATA_FILE ;
     string INIT_SOLUTION_METHOD ;
     string LOCAL_SEARCH_METHOD ;
+    string TERMINATE_METHOD;
+
     unsigned int SEED ;
     unsigned int T ;
     unsigned int TMAX ;
     unsigned int THETA ;
     unsigned int ITERATION_LIMIT ; 
+
     double GAMMA ;
     double ALPHA ;
     double TIME_LIMIT ;
