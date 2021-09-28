@@ -9,6 +9,7 @@ add_executable(tsp
   ./src/model/Node.cpp 
   ./src/model/Distance.cpp
   ./src/model/Tour.cpp
+  ./src/model/Arguments.cpp
   ./src/helper/FileIOHelper.cpp
   ./src/helper/mt19937ar.cpp
   ./src/solver/initial_solution/GenerateInitialSolution.cpp

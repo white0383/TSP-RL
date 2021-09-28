@@ -30,6 +30,7 @@ vector<vector <int> > readTSPFile(const string& file_name){
   vector< vector< int > > node_datas;
   string line_buffer;
   int index, x, y;
+  const string tmp = "EOE";
 
   // Skip first 8 lines (there are only comments)
   for (int i = 0; i<8;i++){
@@ -40,9 +41,12 @@ vector<vector <int> > readTSPFile(const string& file_name){
   while (getline(in, line_buffer)){
     istringstream iss(line_buffer);
 
-    if (iss.str() == "EOF") break; //The last line
-
+    //I don't know why, but even though when iss.str() is "EOF",
+    //iss.str().compare("EOF") is always 1
+    if (iss.str().compare("EOF") == 1) break ;
+    
     iss >> index >> x >> y;
+
     node_datas.push_back({index, x, y}); // Add to node data set
   }
 

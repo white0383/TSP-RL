@@ -3,41 +3,40 @@
 #include <vector>
 
 #include "./model/Graph.h"
-#include "./helper/FileIOHelper.h"
-#include "./helper/mt19937ar.h"
+#include "./model/Tour.h"
+#include "./model/Arguments.h"
 #include "./solver/initial_solution/GenerateInitialSolution.h"
 #include "./solver/local_search/SearchLocalOpt.h"
-#include "./model/Tour.h"
 
 using namespace std;
 
 int main(int argc, char** argv){
-  /************************************/
-  /**** Set your test config here. ****/
-  /************************************/
-  const string TSP_DATA_FILE = argv[1];
-  const string INIT_SOLUTION_METHOD = argv[2];
-  const string LOCAL_SEARCH_METHOD = argv[3];
-  const unsigned int SEED = atoi(argv[4]);
-  // const double TIME_LIMIT = atof(argv[5]);
-  // const long long TOTAL_ITERATION = LL_MAX;
+  vector<string> tmpSTR = {"xqg237.tsp", "RT", "2OPT"};
+  vector<unsigned int> tmpNAT = {1235, 100, 500, 10, 1000000};
+  vector<double> tmpREA = {0.95, 0.95, 123.1};
 
-  // Set seed of random number generator
-  init_genrand(SEED);
+  Arguments tmpArgs = Arguments(tmpSTR, tmpNAT, tmpREA);
 
-  //STEP1 : データの読み込み
-  vector< vector <int> > nodes = readTSPFile(TSP_DATA_FILE);
-  Graph cities = Graph(nodes);
-
-  //STEP2 : 初期解生成
-  Tour pi_init = generateInitialSolution(cities, INIT_SOLUTION_METHOD);
-  pi_init.setCost(cities);
-  pi_init.printTour();
+  Tour pi_init3 = generateInitialSolution(tmpArgs);
+  pi_init3.setCost(tmpArgs.V);
+  pi_init3.printTour();
   
   //STEP3 : 局所探索
-  Tour pi_localOpt = searchLocalOpt(cities, LOCAL_SEARCH_METHOD, pi_init);
-  pi_localOpt.setCost(cities);
-  pi_localOpt.printTour();
+  Tour pi_localOpt3 = searchLocalOpt(tmpArgs, pi_init3);
+  pi_localOpt3.setCost(tmpArgs.V);
+  pi_localOpt3.printTour();
+
+  //##########여기부터 강화학습파트#######
+  //1. 무작위 weight로 초기화
+  //vector<double> weight = generateInitialWeight();
+  //2. 초기 상태 s_init생성
+
+
+  //##########강화학습 끝! ############
+
+
+  return 0;
+}
 
 /**
  * Memo 
@@ -49,20 +48,10 @@ int main(int argc, char** argv){
  * (完了) 5. Tour.printTour メソッド
  *    1->4->13-> ... ->7->1 このように出力し
  *    コストも出力
+ * (完了)9. cの性能低いrandを <random>の mt19937 の全域関数版にする
  * ------ 今後の予定
  * 2. Nearest Neighbor 関数
  * 6. Usage 作成
  * 7. main関数 try-catchにする
  * 8. 各部分に throw 作成
- * (完了)9. cの性能低いrandを <random>の mt19937 の全域関数版にする
- *    mt19937 説明
- *    https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=devmachine&logNo=177685246
- *    https://redforce01.tistory.com/84
- *    mt19937 全域関数化
- *    https://stackoverflow.com/questions/33930182/using-same-random-number-generator-across-multiple-functions
- * 
- * yesyes
  */
-
-  return 0;
-}

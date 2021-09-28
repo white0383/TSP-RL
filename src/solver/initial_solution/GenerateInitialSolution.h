@@ -4,6 +4,7 @@
 #include <string>
 #include "../../model/Tour.h"
 #include "../../model/Graph.h"
+#include "../../model/Arguments.h"
 
 /**
  * Return initial solution of TSP as Tour class
@@ -13,5 +14,7 @@
  * @return Tour : initial solution of TSP
  */
 Tour generateInitialSolution(const Graph& g, const string& method);
+
+Tour generateInitialSolution(const Arguments& tspArgs);
 
 #endif // TSP_GENINITSOLUTION_H
