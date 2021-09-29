@@ -30,7 +30,6 @@ vector<vector <int> > readTSPFile(const string& file_name){
   vector< vector< int > > node_datas;
   string line_buffer;
   int index, x, y;
-  const string tmp = "EOE";
 
   // Skip first 8 lines (there are only comments)
   for (int i = 0; i<8;i++){

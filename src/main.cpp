@@ -19,11 +19,11 @@ vector<double> learnLinearQfunction(const Arguments& tspArgs){
 
   while(isNotSatisfiedTerminationCondition(tspArgs,ite,start)){
     // Sar : struct of pair<Tour, Tour>, vector<double>, double 
-    vector< Sar > ReplayBuffer = generateReplayBuffer(weight, pi_init, tspArgs);
-    vector< Sar > Samples = chooseSample(ReplayBuffer, tspArgs);
-    vector<double> TargetValues = generateTargetValues(Samples, weight);
-    weight = learnWeightByLSM(Samples);
-    pi_init << getNextPiInit(ReplayBuffer);// 演算子オーバロードでなんとかできるはず
+    vector< Sar > replayBuffer = generateReplayBuffer(weight, pi_init, tspArgs);
+    vector< Sar > samples = chooseSample(replayBuffer, tspArgs);
+    vector<double> targetValues = generateTargetValues(samples, weight);
+    weight = learnWeightByLSM(samples, weight, targetValues);
+    pi_init << getNextPiInit(replayBuffer);// 演算子オーバロードでなんとかできるはず
   }
 
   return weight;

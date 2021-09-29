@@ -1,6 +1,7 @@
 # exclude everything
 build/*
 memo/
+debug/
 
 # exception to the rule
 !build/.gitkeep
