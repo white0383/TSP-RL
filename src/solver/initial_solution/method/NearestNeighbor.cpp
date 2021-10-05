@@ -9,12 +9,8 @@
 using namespace std;
 
 Tour nearestNeighbor(const Graph& g){
-  vector<int> order;
-
-  for(int i=0;i<10;i++){
-    int tmp = rand() % 100;
-    cout << "random number : " << tmp << endl; 
-  }
+  cout << "WARNING: NN is not yet implemented" << endl;
+  exit(1);
 
   Tour tmpTour;
 

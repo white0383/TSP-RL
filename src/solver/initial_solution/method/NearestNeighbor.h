@@ -1,7 +1,6 @@
 #ifndef TSP_NEARESTNIEGHBOR_H
 #define TSP_NEARESTNIEGHBOR_H
 
-#include <vector>
 #include "../../../model/Tour.h"
 #include "../../../model/Graph.h"
 

@@ -31,7 +31,7 @@
 //#include "./method/NearestAddition.h"
 //#include "./method/NearestInsertion.h"
 //#include "./method/CheapestInsertion.h"
-//#include "./method/FarthestInsertion.h"
+#include "./method/FarthestInsertion.h"
 //#include "./method/RandomInsertion.h"
 //#include "./method/GreedyAlgorithm.h"
 //#include "./method/ClarkeWright.h"
@@ -59,8 +59,8 @@ Tour generateInitialSolution(const Graph& g, const string& method){
 
   //}else if (method.compare("CI") == 0){
 
-  //}else if (method.compare("FI") == 0){
-
+  }else if (method.compare("FI") == 0){
+    return farthestInsertion(g);
   //}else if (method.compare("RI") == 0){
 
   //}else if (method.compare("GA") == 0){
@@ -87,7 +87,7 @@ Tour generateInitialSolution(const Arguments& tspArgs){
    * Moreover, switch statement is not that faster than this short if-else chain (in my opinion)
    */
   string method = tspArgs.INIT_SOLUTION_METHOD;
-  
+    
   if(method.compare("RT") == 0) {
     return randomTour(tspArgs.V);
   }else if (method.compare("NN") == 0){
@@ -99,8 +99,8 @@ Tour generateInitialSolution(const Arguments& tspArgs){
 
   //}else if (method.compare("CI") == 0){
 
-  //}else if (method.compare("FI") == 0){
-
+  }else if (method.compare("FI") == 0){
+    return farthestInsertion(tspArgs.V);
   //}else if (method.compare("RI") == 0){
 
   //}else if (method.compare("GA") == 0){

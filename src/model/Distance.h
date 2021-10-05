@@ -2,9 +2,11 @@
 #define TSP_DISTANCE_H
 
 #include "Node.h"
+#include "Tour.h"
+#include "Graph.h"
 
-double dist(Node& n1, Node& n2);
+double dist(const Node& n1, const Node& n2);
 
-int distSquare(Node& n1, Node& n2);
+int distSquare(const Node& n1, const Node& n2);
 
 #endif //TSP_DISTANCE_H

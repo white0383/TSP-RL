@@ -15,6 +15,7 @@ add_executable(tsp
   ./src/solver/initial_solution/GenerateInitialSolution.cpp
   ./src/solver/initial_solution/method/RandomTour.cpp
   ./src/solver/initial_solution/method/NearestNeighbor.cpp
+  ./src/solver/initial_solution/method/FarthestInsertion.cpp
   ./src/solver/local_search/SearchLocalOpt.cpp
   ./src/solver/local_search/method/TwoOpt.cpp
 )

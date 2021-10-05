@@ -12,9 +12,8 @@
 using namespace std;
 
 Tour randomTour(const Graph& g){
-  mt19937 mtRand(genrand_int32()); // should be replaced to <random>'s mt19937
-
-  int cityNum = g.getNodesSize();
+  mt19937 mtRand(genrand_int32()); 
+  int cityNum = g.getN();
 
   // visitOrder is {1,2, ... ,cityNum-1, cityNum}
   vector<int> visitOrder(cityNum);

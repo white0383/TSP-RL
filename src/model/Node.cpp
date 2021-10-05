@@ -14,3 +14,9 @@ void Node::printNode() {
   cout << "x : " << this->x << "\t";
   cout << "y : " << this->y << endl;
 }
+
+void Node::setNode(Node& newNode) {
+  this->index = newNode.index;
+  this->x = newNode.x;
+  this->y = newNode.y;
+}

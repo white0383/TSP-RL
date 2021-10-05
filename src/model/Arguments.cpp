@@ -42,8 +42,8 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
 
     vector< vector <int> > nodes = readTSPFile(this->TSP_DATA_FILE);
     this->V = Graph(nodes);
-    this->KSMP = min(this->V.getNodesSize(),100);
-    this->OMEGA = min(this->V.getNodesSize(),100);
+    this->KSMP = min(this->V.getN(),100);
+    this->OMEGA = min(this->V.getN(),100);
     this->K = 3+ this->KSMP + this->OMEGA + 6;
 
   } else {

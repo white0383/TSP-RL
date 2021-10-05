@@ -5,7 +5,7 @@ class Node {
   public:
   /**
    * Node index
-   * or City number
+   * or City's number
    */
   int index = 0;
 
@@ -25,6 +25,8 @@ class Node {
     Node(int index, int x, int y);
 
     void printNode();
+
+    void setNode(Node& newNode);
 };
 
 #endif //TSP_NODE_H
