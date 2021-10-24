@@ -16,6 +16,7 @@ class Episode{
     vector<MDP> replayBuffer;
     vector<int> samples; // just save index of replayBuffer for memory reduction
     vector<double> targetValues;
+    vector< vector<double> > featureVectors;
     unsigned int step; // このエピソードで何番目のMDPか
 
   public:
@@ -25,9 +26,10 @@ class Episode{
 
     /**
      * set T dimention vector "samples"
-     * it has T different int in [1, TMAX]
+     * it has T different int in [0, TMAX-1]
+     * because "step" of each episode is in [0, TMAX-1]
      * 
-     * choose first T member in shuffled [1, TMAX]
+     * choose first T member in shuffled [0, TMAX-1]
      */
     void selectSamples(ReinLearnMemory& RLmemory ,const Arguments& tspArgs);
 

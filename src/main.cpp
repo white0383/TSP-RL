@@ -3,13 +3,9 @@
 #include <vector>
 #include <ctime>
 
-#include "./model/Graph.h"
-#include "./model/Tour.h"
 #include "./model/Arguments.h"
 #include "./RLmodel/ReinLearnMemory.h"
 #include "./RLmodel/Episode.h"
-#include "./solver/initial_solution/GenerateInitialSolution.h"
-#include "./solver/local_search/SearchLocalOpt.h"
 
 using namespace std;
 
@@ -17,15 +13,15 @@ using namespace std;
  * fitted Q iteration algorithm to learn a linear action value function
  */
 vector<double> learnLinearQfunction(const Arguments& tspArgs){
-  ReinLearnMemory RLmemory = ReinLearnMemory(tspArgs); // declare ok, imple ok
+  ReinLearnMemory RLmemory = ReinLearnMemory(tspArgs); // declare ok, imple ok, test ok
 
   while(RLmemory.checkTerminationCondition(tspArgs) == false){
-    Episode episode = Episode(RLmemory, tspArgs); // declare ok, imple ok
+    Episode episode = Episode(RLmemory, tspArgs); // declare ok, imple ok,
     episode.generateReplayBuffer(RLmemory, tspArgs); // declare ok
-    episode.selectSamples(RLmemory, tspArgs); 
-    episode.generateTargetValues(RLmemory, tspArgs);
-    RLmemory.learnWeightByLSM(episode, tspArgs);
-    RLmemory.setNextPiInit(episode);
+    episode.selectSamples(RLmemory, tspArgs); // declare ok, imple ok
+    episode.generateTargetValues(RLmemory, tspArgs); // declare ok
+    RLmemory.learnWeightByLSM(episode, tspArgs); 
+    RLmemory.setNextPiInit(episode); 
     RLmemory.epi++;
   }
 

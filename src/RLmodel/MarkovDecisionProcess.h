@@ -17,7 +17,6 @@ class MDP{
     State state;
     Action action;
     double reward;
-    vector<double> feature;
 }
 
 #endif // TSP_MDP_H
