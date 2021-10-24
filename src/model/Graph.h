@@ -52,7 +52,7 @@ class Graph {
      * @param |V| * 3 int 2D array node_data
      * Memo: it should be changed(or overroaded) when double type coordinate needed(Delete me when it resolved. written in  2021-09-14 )
      */
-    Graph(vector<vector<int>> &node_data);
+    Graph(vector<vector<int> > &node_data);
 
     /**
      * Return the node set of this graph.

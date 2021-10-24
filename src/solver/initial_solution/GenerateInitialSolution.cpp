@@ -9,12 +9,12 @@
  * 
  * 1 RT : Random Tour
  * 2 NN : Nearest Neighbor method
+ * 6 FI : Farthest Insertion method
  * 
- * ----- not yet implemented (written in 2021 09 18 16:40)
+ * ----- not yet implemented (written in 2021 10 05 14:53)
  * 3 NA : Nearest Addition method (prim method like)
  * 4 NI : Nearest Insertion method
  * 5 CI : Cheapest Insertion method
- * 6 FI : Farthest Insertion method
  * 7 RI : Random Insertion method
  * 8 GA : Greedy Algorithm (kuskal method like)
  * 9 CW : Clarke-Wright method (saving method)

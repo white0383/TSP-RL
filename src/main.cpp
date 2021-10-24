@@ -33,7 +33,7 @@ int main(int argc, char** argv){
   /************************************/
   /**** Set your test config here. ****/
   /************************************/
-  vector<string> tmpSTR = {"xqg237.tsp", "RT", "2OPT", "ITE"};
+  vector<string> tmpSTR = {"xqg237.tsp", "FI", "F2OPT", "ITE"};
   vector<unsigned int> tmpINT = {1235, 100, 500, 10, 1000000};
   vector<double> tmpREA = {0.95, 0.95, 123.1};
   Arguments tmpArgs = Arguments(tmpSTR, tmpINT, tmpREA);

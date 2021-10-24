@@ -48,7 +48,7 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
 
   } else {
     //後でUSAGE.txtを出力するように変える
-    cout <<"ERROR : improper input parameter vector's length" << endl;
+    cout <<"ERROR : improper input vectors' length" << endl;
     cout <<"please check your input parameter has" << endl;
     cout << STRINUM << " strings " << endl;
     cout << INTENUM << " unsigned int" << endl;

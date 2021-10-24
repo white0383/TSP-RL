@@ -171,6 +171,14 @@ double Tour::getDistToNode(const Node& n, const Graph& g){
   return rst_dist;
 }
 
+void Tour::setThisIsLocalOpt(){
+  this->localOpt = true;
+}
+
+bool Tour::isLocalOpt(){
+  return this->localOpt;
+}
+
 bool verifyTour(const vector<int> &order, const Graph& g){
   int maxIndex = g.getN();
   vector<bool> visited = vector(maxIndex+1,false);

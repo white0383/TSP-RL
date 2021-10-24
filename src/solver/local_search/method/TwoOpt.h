@@ -15,6 +15,6 @@
  * @param Tour pi : initial solution of TSP 
  * @return Tour solution_star : complete Tour of g
  */
-Tour TwoOpt(const Graph& g, Tour& pi);
+Tour twoOpt(const Graph& g, Tour& pi);
 
 #endif // TSP_2OPT_H

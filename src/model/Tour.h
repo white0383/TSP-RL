@@ -40,6 +40,12 @@ class Tour{
      */
     int size;
 
+    /**
+     * This is "true" when Tour is local Optimal solution.
+     * default value is "false"
+     */
+    bool localOpt = false;
+
   public:
     /**
      * Default constructor
@@ -172,6 +178,16 @@ class Tour{
      * distance is min_{i = 1~m}(dist(u_i, n))
      */
     double getDistToNode(const Node& n, const Graph& g);
+
+    /**
+     * This function is only operated in local searchers
+     */
+    void setThisIsLocalOpt();
+
+    /**
+     * Getter of this->localOpt
+     */
+    bool isLocalOpt();
 
 };
 

@@ -6,27 +6,7 @@
 #include "../../../model/Distance.h"
 #include "../../../model/Node.h"
 
-
 using namespace std;
-/**
- * Memo : written 20210920 14:56
- * 多分3種類の2-optアルゴリズムが存在すると思われる
- * 1. 全ての(i,j)の組み合わせをスキャンして
- *    最もコストが改善されるものを選び、スワップする。
- *    これを改善が発見されないまで繰り返す。
- * 2. 全ての(i,j)をスキャンする途中で
- *    改善が発見されたらスワップし、
- *    その即時最初に戻る。
- *    これを改善が発見されないまで繰り返す
- * 3. 全ての(i,j)をスキャンする途中で
- *    改善が発見されたらスワップし、
- *    最初に戻らず最後までスキャンとスワップを行う。
- *    これを改善が発見されないまで繰り返す
- * 
- * ここでは 3. の方法を実装したが、
- * この３つの方法を比較することも意味があると思われる。
- */
-
 /**
  * 2-opt is like below : (i) represent ith node on tour
  * 
@@ -47,10 +27,11 @@ using namespace std;
  */
 bool isNewTourShorter(vector<int> pi, const Graph& g, int i, int j){
   // node's index is always 1 smaller than city's index
-  Node A = g.nodes.at(pi[i-1] - 1);
-  Node B = g.nodes.at(pi[i] - 1);
-  Node C = g.nodes.at(pi[j] - 1);
-  Node D = g.nodes.at(pi[j+1] - 1);
+  int tmpN = g.getN();
+  Node A = g.nodes.at(pi[i-1]);
+  Node B = g.nodes.at(pi[i]);
+  Node C = g.nodes.at(pi[j]);
+  Node D = g.nodes.at(pi[(j+1) % tmpN]);
 
   double distBeforeSwap = dist(A,B) + dist(C,D);
   double distAfterSwap = dist(A,C) + dist(B,D);
@@ -102,7 +83,7 @@ vector<int> swapTwoOpt(vector<int> pi, int i, int j){
   return new_pi;
 }
 
-Tour TwoOpt(const Graph& g, Tour& pi){
+Tour twoOpt(const Graph& g, Tour& pi){
   vector<int> pi_order = pi.getTour();
   int cityNum = pi.getSize();
   bool improved = true;
@@ -121,10 +102,9 @@ Tour TwoOpt(const Graph& g, Tour& pi){
       }
     }
   }
-
-  pi_order.pop_back(); // cut tail
   
   Tour pi_star(pi_order,g);
+  pi_star.setThisIsLocalOpt();
 
   return pi_star;
 }
