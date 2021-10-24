@@ -10,7 +10,7 @@ using namespace std;
 
 #define STRINUM 4
 #define INTENUM 5
-#define REALNUM 3
+#define REALNUM 4
 
 bool verifyInputVectorLength(vector<string>& stringArgs, vector<unsigned int>& integerArgs, vector<double>& realArgs){
   return (stringArgs.size() == STRINUM) && (integerArgs.size() == INTENUM) && (realArgs.size() == REALNUM);
@@ -32,11 +32,12 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
     this->T = integerArgs[1];
     this->TMAX = integerArgs[2];
     this->THETA = integerArgs[3];
-    this->ITERATION_LIMIT = integerArgs[4];
+    this->EPI_LIMIT = integerArgs[4];
 
     this->GAMMA = realArgs[0];
     this->ALPHA = realArgs[1];
-    this->TIME_LIMIT = realArgs[2];
+    this->SEC_LIMIT = realArgs[2];
+    this->WEIGHT_INTERVAL = realArgs[3];
 
     init_genrand(SEED);
 

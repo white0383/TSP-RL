@@ -14,25 +14,28 @@
 class Arguments {
   public : 
     //Input arguments
-    string TSP_DATA_FILE ;
-    string INIT_SOLUTION_METHOD ;
-    string LOCAL_SEARCH_METHOD ;
-    string TERMINATE_METHOD;
+    string TSP_DATA_FILE ; // file name of tsp instance
+    string INIT_SOLUTION_METHOD ; // name of init solution generator
+    string LOCAL_SEARCH_METHOD ; // name of local-opt searcher
+    string TERMINATE_METHOD; // name of termination method (time or episode)
 
-    unsigned int SEED ;
-    unsigned int T ;
-    unsigned int TMAX ;
-    unsigned int THETA ;
-    unsigned int ITERATION_LIMIT ; 
+    unsigned int SEED ; // seed of rng
+    unsigned int T ; // length of Replay Buffer
+    unsigned int TMAX ; // length of Samples
+    unsigned int THETA ; // parameter in reward function
+    unsigned int EPI_LIMIT ; // Maximum value of episode number
 
-    double GAMMA ;
-    double ALPHA ;
-    double TIME_LIMIT ;
+    double GAMMA ; // parameter for calculating target values
+    double ALPHA ; // parameter in reward function
+    double SEC_LIMIT ; // Maximum value of second
+    double WEIGHT_INTERVAL ; // Interval of initial weight vector
+
     //Arguments that are calculated 
-    unsigned int K ;
-    unsigned int KSMP ;
-    unsigned int OMEGA ;
-    Graph V;
+    unsigned int K ; // lenght of feature vector and weight vector(minus 1)
+    unsigned int KSMP ; // the number of sample node in feature mapping (state part)
+    unsigned int OMEGA ; // the number of largest sum of edge weight in feature mapping (state part)
+
+    Graph V; // set of nodes
   public :
     Arguments();
 

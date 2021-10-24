@@ -21,6 +21,7 @@ vector<vector <int> > readTSPFile(const string& file_name){
   // Open the data file
   ifstream in(convertToDataPath(file_name));
 
+  cout << convertToDataPath(file_name) << endl;
   // Check the file successfully opened
   if (in.fail()) {
     cout << "ERROR: Could not open the file!" << endl;
