@@ -13,11 +13,14 @@
 
 class Arguments {
   public : 
-    //Input arguments
+    //==========================================
+    //===== Input arguments ===================
+    //==========================================
     string TSP_DATA_FILE ; // file name of tsp instance
     string INIT_SOLUTION_METHOD ; // name of init solution generator
     string LOCAL_SEARCH_METHOD ; // name of local-opt searcher
     string TERMINATE_METHOD; // name of termination method (time or episode)
+    string ACTION_GREEDY_METHOD; // name of greedy algorithm in Action constructor
 
     unsigned int SEED ; // seed of rng
     unsigned int T ; // length of Replay Buffer
@@ -29,11 +32,15 @@ class Arguments {
     double ALPHA ; // parameter in reward function
     double SEC_LIMIT ; // Maximum value of second
     double WEIGHT_INTERVAL ; // Interval of initial weight vector
+    double EPS ; // parameter of epsilon greedy in Action constructor
 
-    //Arguments that are calculated 
+    //==========================================
+    //===== Arguments that are calculated ======
+    //==========================================
     unsigned int K ; // lenght of feature vector and weight vector(minus 1)
     unsigned int KSMP ; // the number of sample node in feature mapping (state part)
     unsigned int OMEGA ; // the number of largest sum of edge weight in feature mapping (state part)
+    unsigned int M ; // the number of samples about every sigma in Action's greedy algorithm
 
     Graph V; // set of nodes
   public :

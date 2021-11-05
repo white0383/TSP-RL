@@ -12,7 +12,7 @@
 using namespace std;
 
 class Episode{
-  private:
+  public:
     vector<MDP> replayBuffer;
     vector<int> samples; // just save index of replayBuffer for memory reduction
     vector<double> targetValues;
@@ -31,7 +31,7 @@ class Episode{
      * 
      * choose first T member in shuffled [0, TMAX-1]
      */
-    void selectSamples(ReinLearnMemory& RLmemory ,const Arguments& tspArgs);
+    void selectSamples(const Arguments& tspArgs);
 
     /**
      * set T dimetion vector "targenValues"

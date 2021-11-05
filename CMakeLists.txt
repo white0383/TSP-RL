@@ -12,6 +12,7 @@ add_executable(tsp
   ./src/model/Arguments.cpp
   ./src/RLmodel/Episode.cpp 
   ./src/RLmodel/ReinLearnMemory.cpp 
+  ./src/RLmodel/MarkovDecisionProcess.cpp
   ./src/helper/FileIOHelper.cpp
   ./src/helper/mt19937ar.cpp
   ./src/solver/initial_solution/GenerateInitialSolution.cpp

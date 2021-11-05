@@ -41,9 +41,10 @@ namespace reinLearnMemoryHelper{
 
 
 ReinLearnMemory::ReinLearnMemory(const Arguments& tspArgs){
-  this->weights = reinLearnMemoryHelper::genRandomWeights(tspArgs)
+  this->weights = reinLearnMemoryHelper::genRandomWeights(tspArgs);
   this->pi_init = generateInitialSolution(tspArgs);
   this->epi = 1;
+  this->startSec = clock();
   this->spendSec = 0.0;
   this->MAXepi = tspArgs.EPI_LIMIT;
   this->MAXsec = tspArgs.SEC_LIMIT;
@@ -70,6 +71,11 @@ bool ReinLearnMemory::checkTerminationCondition(const Arguments& tspArgs){
 Tour ReinLearnMemory::getPiInit(){
   return this->pi_init;
 }
+
+vector<double> ReinLearnMemory::getWeights(){
+  return this->weights;
+}
+
 
 // For Debugging
 void ReinLearnMemory::setPiInitCost(const Arguments& tspArgs){

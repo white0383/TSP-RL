@@ -1,6 +1,7 @@
 #include "Episode.h"
 #include "ReinLearnMemory.h"
 #include "MarkovDecisionProcess.h"
+#include "../helper/mt19937ar.h"
 #include "../model/Arguments.h"
 #include "../model/Graph.h"
 #include "../model/Tour.h"
@@ -8,6 +9,7 @@
 
 #include <vector>
 #include <numeric> // std::iota, std::inner_product
+#include <random>
 
 using namespace std;
 
@@ -46,6 +48,7 @@ Episode::Episode(const Arguments& tspArgs){
   this->step = 1;
 };
 
+/*
 void Episode::generateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& tspArgs){
   Tour pi_step = RLmemory.getPiInit();
   Tour pi_step_star = searchLocalOpt(tspArgs, pi_step);
@@ -61,8 +64,9 @@ void Episode::generateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& t
     RLmemory.time++;
   }
 };
+*/
 
-void Episode::selectSamples(ReinLearnMemory& RLmemory ,const Arguments& tspArgs){
+void Episode::selectSamples(const Arguments& tspArgs){
   // generate {0,1, ... , TMAX-1} and shuffle it
   vector<int> tmpVec(tspArgs.TMAX);
   iota(tmpVec.begin(), tmpVec.end(), 0);
@@ -75,6 +79,7 @@ void Episode::selectSamples(ReinLearnMemory& RLmemory ,const Arguments& tspArgs)
   }
 }
 
+/*
 void Episode::generateTargetValues(ReinLearnMemory& RLmemory ,const Arguments& tspArgs){
   for(int i=0;i<tspArgs.T;i++){
     int sample_index = this->samples.at(i);
@@ -87,3 +92,4 @@ void Episode::generateTargetValues(ReinLearnMemory& RLmemory ,const Arguments& t
     this->targetValues.emplace_back(rho_i);
   }
 }
+*/

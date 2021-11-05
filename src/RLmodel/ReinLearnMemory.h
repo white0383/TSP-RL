@@ -3,17 +3,19 @@
 
 #include <vector>
 #include <queue>
+#include <ctime>
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
 
 class Episode; //predeclaration
 class ReinLearnMemory{
-  private:
+  public:
     vector<double> weights;
     Tour pi_init;
     unsigned int epi;
-    double spendSec;
     unsigned int MAXepi;
+    time_t startSec;
+    double spendSec;
     double MAXsec;
     unsigned int time;
 
@@ -41,6 +43,9 @@ class ReinLearnMemory{
      * set "pi_init" to Episode.replayBuffer.back().state.pi
      */
     void setNextPiInit(const Episode& episode);
+
+    // Getter
+    vector<double> getWeights();
 
     //For Debugging
     void setPiInitCost(const Arguments& tspArgs);
