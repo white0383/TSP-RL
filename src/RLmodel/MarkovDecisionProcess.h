@@ -75,18 +75,121 @@ namespace ActionHelper{
    * inverse Function of encodeSwap
    * swap and swapCode are bijective
    * 
-   * I don't know how to implement it O(1)
-   * so I implement it by using iteration
+   * let swapCode is x
+   * let decodeSwapCode(x,n) = (a,b)
+   * let a0 := (1/2) * {(2n-1) - sqrt((2n-1)^1 -8x)}
+   * then a = ceil(a0)
+   * and b = x - {n(a-1) - (a^2 + a)/2}
    * 
-   * x((a,b),n) is sum_(i=1 to a-1){n-i} + (b-a)
-   * step 1: let a = 0, cpx = x
-   * step 2: subtract (n-a-1) from cpx
-   * step 3: add 1 to a
-   * step 4: if cpx > 0 goback to step2
-   * step 5: leb b = cpx + n
-   * return pair (a,b)
+   * details on github 
    */
   pair<int,int> decodeSwapCode(int swapCode, int n);
+
+  /**
+   * ActionHelper::gen~~ returns swaps(vector<pair<int,int> >)
+   * 
+   * genEpsGreedy :
+   *  let eps = tspArgs.EPS
+   *  return genGreedy in Prob. 1-eps
+   *  return genRandom in Prob. eps
+   *  When eps == 1, it is Fully random
+   *  When eps == 0, it is Fully Greedy
+   * genGreedy :
+   *  let method = tspArgs.ACTION_GREEDY_METHOD
+   *  if method == "FULL" return genFullGreedy
+   *  if method == "PART" return genPartGreedy
+   *  if method == "SAMP" return genSampleGreedy
+   */ 
+  vector<pair<int,int> > genEpsGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  vector<pair<int,int> > genGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+
+  /**
+   * This method will be significantly slow
+   * but it may be worthy -> O(n^3)...
+   * 
+   * Strategy:
+   *  repeatly search every non-implicated swap of current best swaps
+   *  until sigma == n/2 or no more better action found
+   * 
+   * To do this faster, 
+   * Action features are calculated by only differential(差分)
+   * of swaps (i.e. new candidate swap )
+   */
+  vector<pair<int,int> > genFullGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+
+  /**
+   * Strategy:
+   *  repeatly search M numbers of non-implicated swap of current best swaps
+   *  until sigma == n/2 or no more better action found in M sampled swaps
+   */
+  vector<pair<int,int> > genPartGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+
+  /**
+   * Strategy:
+   *  for every sigma in [1,ceil(n/2)],
+   *  generate M ramdom swaps.
+   *  Compare all of them, and use best scored one
+   */
+  vector<pair<int,int> > genSampleGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+
+  /**
+   * return ramdom swaps
+   * 
+   * let n = tspArgs.V.getN
+   * let sigma = random int in [1,n/2]
+   * let swapCodeMax = (n*n -n) / 2
+   * let swapCodes = randVecBySet(swapCodeMax, sigma)
+   * let rst_swaps = {for swapCode in swapCodes : decode(swapCode)}
+   * return rst_swaps
+   */
+  vector<pair<int,int> > genRandom(const Arguments& tspArgs);
+
+  /**
+   * Calculate action feature vector by only one swap not entire swaps
+   * 
+   * let swaps is \sigma dimentional vector of pair<int,int>
+   * let pi_vec and pi_inv_vec is Tour's infomation
+   * it represent already perterbed tour by swaps from pi_star
+   * let's call this tour pi_now
+   * let actFeatures is action feature vector of (pi_star, swaps)
+   * actFeatures is (_f1, _f2, _f3, _f4, _f5, _f6)
+   * 
+   * let swaps_new is \sigma+1 dimentional vector of pair<int,int>
+   * let swap is next pair of node's index which are going to be swapped
+   * then, swaps_new is (swaps, swap) 
+   * let pi_next is Tour which is perturbed by swaps_new from pi_star (i.e. perturbed by swap from pi_now)
+   * 
+   * I want to calculate action feature vector of (pi_star, swaps_new), and it can be calculated by information of actFeature(i.e. action feature vector of (pi_star, swaps)), pi_now and swap.
+   * let this feature vector actFeatures_new = (f1,f2,f3,f4,f5,f6)
+   * 
+   * Calculation of each member of actFeatures_new is like below
+   * 1. f1 
+   *  f1 = _f1 + 1
+   * 2. f2, f3
+   *  f2 = _f2 + (added weights by swap)
+   *  f3 = _f3 + (dropped weights by swap)
+   * 3. f4, f5, f6
+   *  let swap is (p,q)
+   *  let t = RLmemory.time
+   *  let t_p = t - RLmemory.lastTimeActioned[p]
+   *  let t_q = t - RLmemory.lastTimeActioned[q]
+   *  then, 
+   *    f4 = min(_f4, t_p, t_q)
+   *    tmpSum = _f5 * (2* _f1) + t_p + t_q
+   *    f5 = tmpSum / (2 * f1)
+   *    f6 = max(_f6, t_p, t_q)
+   * 
+   * Finally, return (f1,f2,f3,f4,f5,f6)
+   */
+  vector<double> getTmpActionFeatures(const vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, ReinLearnMemory& RLmemory,const Arguments& tspArgs);
+
+  /**
+   * This function do the same thing of ActionHelper::getTmpActionFeatures, but this also updates actFeatures, pi_vec, pi_inv_vec. 
+   * 
+   * So, it returns nothing
+   * and initially operate actFeatures, pi_vec, pi_inv_vec
+   */
+  void updateActionFeatures(vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
 }
 
 namespace MDPHelper{
@@ -111,6 +214,13 @@ namespace MDPHelper{
    * Finally return pair (addedDist, droppedDist)
    */
   pair<double,double> subPerturb(vector<int>& pi, vector<int>& pi_inv, const pair<int,int>& swap, const Arguments& tspArgs);
+
+  /**
+   * Do the same thing of subPerturb,
+   * but don't swap pi[p], pi[q]
+   * Only calculate added and dropped weights
+   */
+  pair<double,double> getAddedDroppedWeights(vector<int>& pi, vector<int>& pi_inv, const pair<int,int>& swap, const Arguments& tspArgs);
 
   /**
    * There are 6 elements in action's feature vector
@@ -147,6 +257,41 @@ namespace MDPHelper{
    */
   vector<double> getActionFeatures(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
   vector<double> getActionFeatures(const vector<pair<int,int> >& swaps, Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+
+  //vector<double> getStateFeatures(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+
+  //vector<double> getFeatureVector(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs)
+
+  /**
+   * Qfunction( action value function) is a mapping 
+   * from {Action} x {State} to R (real num).
+   * 
+   * let st is input State
+   * let ac is input Action
+   * let K is the demension of feature vector f(st,ac)
+   * K is equal to 3 + K_smp + omega + 6
+   * let K_st is 3 + K_smp + omega 
+   * and K_ac is 6 (i.e. K = K_st + K_ac)
+   * let f(st,ac) = ( f_st(st) , f_ac(st, ac) )
+   * size of f_st(st) is K_st and f_ac(st, ac) is K_ac
+   * 
+   * let w is weight vector which is K-dimentional
+   * and w_0 is weight constant
+   * w is (w_st, w_ac)
+   * 
+   * <u | v> is dot product
+   * 
+   * then, Q function is represented like below
+   * Q(st, ac) = w_0 + < f(st,ac) | w >
+   *           = w_0 + < f_st(st) | w_st > + < f_ac(st,ac) | w_ac >
+   *           = w_0 + Q_1(st) + Q_2(st,ac)
+   * 
+   * Q_1 is evaluateStateFeatures
+   * Q_2 is evaluateActionFeatures
+   */
+  double Qfunction(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  double evaluateActionFeatures(vector<double> actionFeatures, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  double evaluateStateFeatures(vector<double> stateFeatures, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
 }
 
 class State{

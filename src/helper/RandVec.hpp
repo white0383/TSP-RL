@@ -81,4 +81,36 @@ vector<int> genRandDiffIntVecBySet(int n, int m){
   return genRandDiffIntVecBySet(1,n,m);
 }
 
+/**
+ * Generate num-dimentional vector whose elements are diffrent each other
+ * and randomly choosed in [min, max] - exceptionSet
+ */
+vector<int> genRandDiffIntVecWithExceptionSec(int min, int max, int num, set<int> exceptionSet){
+  //Exception check
+  if(min >= max){
+    cout << "ERROR : genRandDiffIntVecBySet : min is greater then max" << endl;
+    exit(1);
+  } else if((max - min + 1 - exceptionSet.size()) < num){
+    cout << "ERROR : genRandDiffIntVecBySet : num is greater than (max - min + 1 - |exceptionSet|)" << endl;
+    exit(1);
+  }
+
+  vector<int> rstVec;
+  rstVec.reserve(num);
+  int ele = 0;
+  int interval = max - min + 1;
+
+  while(rstVec.size() < num){
+    ele = (genrand_int32() % interval ) + min;
+    bool isNotDuplicated = exceptionSet.insert(ele).second;
+    if(isNotDuplicated){
+      rstVec.emplace_back(ele);
+    }
+  }
+  return rstVec;
+}
+vector<int> genRandDiffIntVecWithExceptionSec(int n, int m, set<int> exceptionSet){
+  return genRandDiffIntVecWithExceptionSec(1,n,m,exceptionSet);
+}
+
 #endif //TSP_RANDVEC_HPP
