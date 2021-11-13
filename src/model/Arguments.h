@@ -6,9 +6,11 @@
 #include "../model/Graph.h"
 
 /**
- * 한가지 강화학습에 필요한 모든 전달인자(argument)를 하나의 객체로 다룬다.
- * 사용시 "반드시" const Arguments& foo 의 형태로 함수에 전달되며,
- * 각 맴버 변수를 public으로 선언해서 . 연산자로 접근 가능하게 한다.
+ * 強化学習に必要なすべての伝達因子(argument)を１つのオブジェクトとして扱う
+ * このオブジェクトは一度生成された後、修正されない
+ * しかし、デバッグを楽にするため、constには生成しない
+ * 使うときに！！必ず！！const Arguments& tspArgs のように使用
+ * 各メンバー変数をpublicに宣言し、. operatorでアクセスできるようにする。
  */
 
 class Arguments {
@@ -21,18 +23,20 @@ class Arguments {
     string LOCAL_SEARCH_METHOD ; // name of local-opt searcher
     string TERMINATE_METHOD; // name of termination method (time or episode)
     string ACTION_GREEDY_METHOD; // name of greedy algorithm in Action constructor
+    string WEIGHT_INIT_METHOD; // name of weight initialization method
 
-    unsigned int SEED ; // seed of rng
+    unsigned int SEED ; // seed of RNG
     unsigned int T ; // length of Replay Buffer
     unsigned int TMAX ; // length of Samples
     unsigned int THETA ; // parameter in reward function
     unsigned int EPI_LIMIT ; // Maximum value of episode number
+    unsigned int MMAX ; // Maximum size of MDP queue
 
-    double GAMMA ; // parameter for calculating target values
-    double ALPHA ; // parameter in reward function
+    double GAMMA ; // parameter for calculating target values. in [0,1]
+    double ALPHA ; // parameter in reward function. in [0,1]
     double SEC_LIMIT ; // Maximum value of second
-    double WEIGHT_INTERVAL ; // Interval of initial weight vector
-    double EPS ; // parameter of epsilon greedy in Action constructor
+    double WEIGHTS_INITPARA ; // Interval of initial weight vector
+    double EPS ; // parameter of epsilon greedy in Action constructor in [0,1]
 
     //==========================================
     //===== Arguments that are calculated ======
@@ -40,7 +44,7 @@ class Arguments {
     unsigned int K ; // lenght of feature vector and weight vector(minus 1)
     unsigned int KSMP ; // the number of sample node in feature mapping (state part)
     unsigned int OMEGA ; // the number of largest sum of edge weight in feature mapping (state part)
-    unsigned int M ; // the number of samples about every sigma in Action's greedy algorithm
+    unsigned int ASMP ; // the number of samples about every sigma in Action's greedy algorithm
 
     Graph V; // set of nodes
   public :

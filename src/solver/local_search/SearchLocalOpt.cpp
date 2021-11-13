@@ -5,7 +5,7 @@
  * 
  * 1 2OPT : 2-opt -> search neighborhood in sequence
  * 
- * ----- not yet implemented (written in 2021 09 19 16:52)
+ * ----- not yet implemented (written in 2021 11 13 15:15)
  * 2 F2OPT : fast 2-opt -> improved 2-opt suggested by haraguchi. prof 
  * 3 3OPT : 3-opt
  * 4 LK : Lin–Kernighan method

@@ -320,6 +320,7 @@ class Action{
   public:
     Action(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
     vector<pair <int, int> > getSwaps();
+    int getSigma();
 };
 
 class MDP{

@@ -440,7 +440,7 @@ vector<pair<int,int> > ActionHelper::genPartGreedy(Tour& pi_star, ReinLearnMemor
   while(sigma<sigmaMax){
     sigma ++;
     bestScore_prevSigma = bestScore;
-    vector<int> tmp_codes = genRandDiffIntVecWithExceptionSec(codeMax, tspArgs.M, codeSet);
+    vector<int> tmp_codes = genRandDiffIntVecWithExceptionSec(codeMax, tspArgs.ASMP, codeSet);
 
     for(int tmp_code : tmp_codes){
       tmp_swap = ActionHelper::decodeSwapCode(tmp_code,n);
@@ -477,7 +477,7 @@ vector<pair<int,int> > ActionHelper::genSampleGreedy(Tour& pi_star, ReinLearnMem
   vector<pair<int,int> > tmp_swaps;
 
   for(sigma=1;sigma < sigmaMax+1 ; sigma++){
-    for(int i=0;i<tspArgs.M;i++){
+    for(int i=0;i<tspArgs.ASMP;i++){
       vector<int> tmp_codes = genRandDiffIntVecBySet(codeMax, sigma);
       
       //decode tmp_codes -> tmp_swaps
@@ -504,13 +504,10 @@ vector<pair<int,int> > ActionHelper::genGreedy(State& s, ReinLearnMemory& RLmemo
   Tour pi_star = s.getPiStar();
 
   if(tspArgs.ACTION_GREEDY_METHOD == "FULL"){
-    cout << "fulllll" << endl;
     return ActionHelper::genFullGreedy(pi_star,RLmemory,tspArgs);
   } else if(tspArgs.ACTION_GREEDY_METHOD == "PART"){
-    cout << "paaaart" << endl;
     return ActionHelper::genPartGreedy(pi_star,RLmemory,tspArgs);
   } else if(tspArgs.ACTION_GREEDY_METHOD == "SAMP"){
-    cout << "saaaaamp" << endl;
     return ActionHelper::genSampleGreedy(pi_star,RLmemory,tspArgs);
   }
 
@@ -523,9 +520,51 @@ vector<pair<int,int> > ActionHelper::genGreedy(State& s, ReinLearnMemory& RLmemo
   return rst_dummy;
 }
 
+vector<pair<int,int> > ActionHelper::genRandom(const Arguments& tspArgs){
+  int n=tspArgs.V.getN();
+  const int codeMax = (n*n-n)/2;
+
+  const int sigmaMax = (int)(ceil(n/2.0));
+  const int sigma = (genrand_int31() % sigmaMax) + 1;
+
+  vector<int> rand_codes = genRandDiffIntVecBySet(codeMax,sigma);
+  vector<pair<int,int> > rst_swaps;
+  rst_swaps.reserve(sigma);
+  for(auto rand_code : rand_codes){
+    rst_swaps.emplace_back(ActionHelper::decodeSwapCode(rand_code,n));
+  }
+
+  return rst_swaps;
+}
+
+vector<pair<int,int> > ActionHelper::genEpsGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+  double pr = genrand_real3();
+  if(pr < tspArgs.EPS){
+    return ActionHelper::genRandom(tspArgs);
+  } else {
+    return ActionHelper::genGreedy(s,RLmemory,tspArgs);
+  }
+
+  // statements below are just for c++ grammar
+  // Only when Acguments' initialization has problem, 
+  // below statement will run.
+  vector<pair<int,int> > rst_dummy;
+  rst_dummy.push_back(make_pair(1,2));
+  cout << "ERROR : ActionHelper::genEpsGreedy invalid EPS value" << endl;
+  return rst_dummy;  
+}
+
+Action::Action(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+  this->swaps = ActionHelper::genEpsGreedy(s,RLmemory,tspArgs);
+  this->sigma = this->swaps.size();
+}
 
 vector<pair <int,int> > Action::getSwaps(){
   return this->swaps;
+}
+
+int Action::getSigma(){
+  return this->sigma;
 }
 
 //==== MDP ===+==================================

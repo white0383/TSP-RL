@@ -9,6 +9,8 @@
 #include <iostream>
 #include <vector>
 #include <float.h>
+#include <random> // std::normal_distribution
+
 using namespace std;
 
 namespace reinLearnMemoryHelper{
@@ -16,15 +18,46 @@ namespace reinLearnMemoryHelper{
    * Generate weight vecotr which has random double-type values
    * there values are included in [ (+-) tspArgs.WEIGHTINTERVAL/2]
    */
-  vector<double> genRandomWeights(const Arguments& tspArgs){
+  vector<double> genRandomWeights_Uniform(const Arguments& tspArgs){
     vector<double> rst_weights;
     rst_weights.reserve(tspArgs.K + 1);
     double weight =0.0;
     for(int i=0;i<tspArgs.K +1;i++){
-      weight = (genrand_real1()-0.5 ) * tspArgs.WEIGHT_INTERVAL;
+      weight = (genrand_real1()-0.5 ) * tspArgs.WEIGHTS_INITPARA;
       rst_weights.push_back(weight);
     }
     return rst_weights;
+  }
+
+  vector<double> genRandomWeights_Gaussian(const Arguments& tspArgs){
+    vector<double> rst_weights;
+    rst_weights.reserve(tspArgs.K + 1);
+    // set gaussian RNG
+    mt19937 gen(genrand_int32());
+    normal_distribution<double> gauss(0,tspArgs.WEIGHTS_INITPARA);
+    double weight =0.0;
+    for(int i=0;i<tspArgs.K +1;i++){
+      weight = gauss(gen);
+      rst_weights.push_back(weight);
+    }
+    return rst_weights;    
+  }
+
+  vector<double> genRandomWeights(const Arguments& tspArgs){
+    if(tspArgs.WEIGHT_INIT_METHOD == "UNIFM"){
+      cout << "uni" << endl;
+      return genRandomWeights_Uniform(tspArgs);
+    } else if (tspArgs.WEIGHT_INIT_METHOD == "GAUSS"){
+      cout << "ggg" << endl;
+      return genRandomWeights_Gaussian(tspArgs);
+    }
+
+    // statements below are just for c++ grammar
+    // Only when Acguments' initialization has problem, 
+    // below statement will run.
+    vector<double> rst_dummy;
+    cout << "ERROR : reinLearnMemoryHelper::genRandomWeights invalid Arguments' WEIGHT_INIT_METHOD" << endl;
+    return rst_dummy;   
   };
 
   vector<int> genSizeNZeroVector(const Arguments& tspArgs){
@@ -62,8 +95,11 @@ bool ReinLearnMemory::checkTerminationCondition(const Arguments& tspArgs){
   }else if(tspArgs.TERMINATE_METHOD == "SEC"){
     return (this->spendSec > this->MAXsec);
   }
-  //else -> input error
-  cout << "Error : check input TERMINATE_METHOD is \"EPI\" or \"SEC\" " << endl;
+
+  // statements below are just for c++ grammar
+  // Only when Acguments' initialization has problem, 
+  // below statement will run.
+  cout << "Error : ReinLearnMemory::checkTerminationCondition invalid termination condition " << endl;
   cout << "Your input TERMINATE_METHOD is \"" << tspArgs.TERMINATE_METHOD <<"\""<< endl;
   exit(1);
 }
