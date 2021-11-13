@@ -34,6 +34,7 @@ class Tour{
      * Sum of every edge on Tour
      */
     double cost;
+    double scaledCost;
 
     /**
      * The number of cities which Tour object has.
@@ -91,6 +92,7 @@ class Tour{
      * @return this->cost
      */
     double getCost();
+    double getScaledCoset();
 
     /**
      * Calculate Tour's cost
@@ -98,6 +100,7 @@ class Tour{
      * @param Graph g
      */
     void setCost(const Graph &g);
+    void setScaledCost(const Graph &g);
 
     /**
      * Get tour vector of this object

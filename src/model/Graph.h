@@ -37,6 +37,24 @@ class Graph {
      * It takes O(n log n) to construct distOrder,
      */
     vector< vector< pair<int, double> > > distOrder;
+
+    /**
+     * vector of MinMax Scaled Nodes
+     * 
+     * let Nodes = {(x_i, y_i)} (i = 1 ~ n)
+     * let xMin(resp. Max) = min(resp. max){x_i} 
+     * let yMin(resp. Max) = min(resp. max){y_i}
+     * 
+     * let scaled_x_i = (x_i - xMin) / (xMax - xMin)
+     * let scaled_y_i = (y_i - yMin) / (yMax - yMin)
+     * 
+     * then, scaledNodes := {(scaled_x_i, scaled_y_i)} (i = 1~n)
+     */
+    vector<ScaledNode> scaledNodes;
+    int xMin;
+    int xMax;
+    int yMin;
+    int yMax;
   
   public:
     /**
@@ -50,7 +68,6 @@ class Graph {
      * Create Graph object with node data.
      * 
      * @param |V| * 3 int 2D array node_data
-     * Memo: it should be changed(or overroaded) when double type coordinate needed(Delete me when it resolved. written in  2021-09-14 )
      */
     Graph(vector<vector<int> > &node_data);
 
@@ -58,11 +75,13 @@ class Graph {
      * Return the node set of this graph.
      */
     vector<Node> getNodes() const;
+    vector<ScaledNode> getScaledNodes() const;
 
     /**
      * Return a node whose index is i.
      */
     Node getNode(int i) const;
+    ScaledNode getScaledNode(int i) const;
 
     /**
      * Return the number of nodes that this graph.

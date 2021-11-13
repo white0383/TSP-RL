@@ -45,10 +45,8 @@ namespace reinLearnMemoryHelper{
 
   vector<double> genRandomWeights(const Arguments& tspArgs){
     if(tspArgs.WEIGHT_INIT_METHOD == "UNIFM"){
-      cout << "uni" << endl;
       return genRandomWeights_Uniform(tspArgs);
     } else if (tspArgs.WEIGHT_INIT_METHOD == "GAUSS"){
-      cout << "ggg" << endl;
       return genRandomWeights_Gaussian(tspArgs);
     }
 

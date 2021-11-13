@@ -20,3 +20,15 @@ void Node::setNode(Node& newNode) {
   this->x = newNode.x;
   this->y = newNode.y;
 }
+
+ScaledNode::ScaledNode(int index, double x, double y){
+  this->index = index;
+  this->x = x;
+  this->y = y;
+}
+
+void ScaledNode::printScaledNode(){
+  cout << "index : " << this->index << "\t" ;
+  cout << "x : " << this->x << "\t";
+  cout << "y : " << this->y << endl;  
+}

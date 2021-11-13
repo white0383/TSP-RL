@@ -11,23 +11,10 @@ using namespace std;
 
 Tour::Tour(){
   this->cost = DBL_MAX;
+  this->scaledCost = DBL_MAX;
   this->size = 0;
 }
 
-/**
-Tour::Tour(const vector<int> &order, const Graph& g){
-  vector<int> tmpTourVector = order;
-  tmpTourVector.push_back(tmpTourVector[0]); //connect head and tail
-
-  if(verifyTour(order, g) != true){
-    cout << "WARNING : improper input vector in Tour object constructor";
-  }else{
-    this->tour.assign(tmpTourVector.begin(), tmpTourVector.end());
-    this->cost = DBL_MAX;
-    this->size = order.size();
-  }
-}
-*/
 Tour::Tour(const vector<int>& order, const Graph& g){
   if(verifyTour(order, g) == false){
     cout << "ERROR : improper input vector in Tour object constructor";
@@ -35,6 +22,7 @@ Tour::Tour(const vector<int>& order, const Graph& g){
   } else {
     this->tour = order;
     this->cost = DBL_MAX;
+    this->scaledCost = DBL_MAX;
     this->size = order.size();
   }
 }
@@ -46,6 +34,7 @@ void Tour::setNewTour(const vector<int>& newTour, const Graph& g){
   } else {
     this->tour = newTour;
     this->cost = DBL_MAX;
+    this->scaledCost = DBL_MAX;
     this->size = newTour.size();
   }
 }
@@ -69,9 +58,11 @@ bool Tour::isCompleteTour(const Graph& g){
 double Tour::getCost() {
   return this->cost;
 };
+double Tour::getScaledCoset() {
+  return this->scaledCost;
+}
 
 void Tour::setCost(const Graph &g) {
-  int tmpCount = 0;
   double cost = 0;
   vector<int>::iterator it;
 
@@ -80,16 +71,32 @@ void Tour::setCost(const Graph &g) {
     Node currentNode = g.nodes[(*it)];
     Node nextNode = g.nodes[(*(it + 1))];
     cost += dist(currentNode, nextNode);
-    tmpCount++;
   }
   //add dist(n,1)
   Node firstNode = g.nodes[this->pi(1)];
   Node lastNode = g.nodes[this->pi(this->size)];
   cost += dist(lastNode, firstNode);
-  tmpCount++;
 
   this->cost = cost;
 };
+
+void Tour::setScaledCost(const Graph& g){
+  double rst_scaledCost = 0;
+  vector<int>::iterator it;
+
+  //add from dist(1,2) to add(n-1, n)
+  for(it=this->tour.begin(); it!=this->tour.end()-1 ;it++){
+    ScaledNode currentScaledNode = g.scaledNodes[(*it)];
+    ScaledNode nextScaledNode = g.scaledNodes[(*(it +1))];
+    rst_scaledCost += dist(currentScaledNode, nextScaledNode);
+  }
+  //add dist(n,1)
+  ScaledNode firstScaledNode = g.scaledNodes[this->pi(1)];
+  ScaledNode lastScaledNode = g.scaledNodes[this->pi(this->size)];
+  rst_scaledCost += dist(firstScaledNode, lastScaledNode);
+
+  this->scaledCost = rst_scaledCost;
+}
 
 vector<int>& Tour::getTour(){
   return this->tour;
@@ -116,6 +123,14 @@ void Tour::printTour() {
   } else {
     cout << this->cost << endl;
   }
+
+  //3. print scaledCost
+  cout << "scaled cost : " ;
+  if(this->scaledCost == DBL_MAX){
+    cout << "Not yet Calculated" << endl;
+  } else {
+    cout << this->scaledCost << endl;
+  }  
 }
 
 int Tour::pi(int order){

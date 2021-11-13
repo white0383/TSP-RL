@@ -29,4 +29,16 @@ class Node {
     void setNode(Node& newNode);
 };
 
+class ScaledNode {
+  public:
+  int index = 0;
+  double x = 0.0;
+  double y = 0.0;
+
+  public:
+  ScaledNode(int index, double x, double y);
+
+  void printScaledNode();
+};
+
 #endif //TSP_NODE_H
