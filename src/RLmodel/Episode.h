@@ -2,7 +2,7 @@
 #define TSP_EPISODE_H
 
 #include <vector>
-#include <tuple>
+#include <deque>
 #include <utility> // std::pair
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
@@ -13,7 +13,7 @@ using namespace std;
 
 class Episode{
   public:
-    vector<MDP> replayBuffer;
+    deque<MDP> replayBuffer;
     vector<int> samples; // just save index of replayBuffer for memory reduction
     vector<double> targetValues;
     vector< vector<double> > featureVectors;
@@ -22,7 +22,7 @@ class Episode{
   public:
     Episode(const Arguments& tspArgs);
 
-    void generateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& tspArgs);
+    void updateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& tspArgs);
 
     /**
      * set T dimention vector "samples"

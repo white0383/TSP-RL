@@ -10,6 +10,7 @@
 #include <vector>
 #include <float.h>
 #include <random> // std::normal_distribution
+#include <deque>
 
 using namespace std;
 
@@ -63,10 +64,10 @@ namespace reinLearnMemoryHelper{
     return rstVector;
   };
 
-  queue<double> genInitDistQueue(){
-    queue<double> rstQueue;
-    rstQueue.push(DBL_MAX); // d(pi_0_star = DBL_MAX)
-    return rstQueue;
+  deque<double> genInitDistQueue(){
+    deque<double> rst_Queue;
+    rst_Queue.push_back(DBL_MAX); // d(pi_0_star) = DBL_MAX
+    return rst_Queue;
   } ;
 }
 
@@ -75,7 +76,7 @@ ReinLearnMemory::ReinLearnMemory(const Arguments& tspArgs){
   this->weights = reinLearnMemoryHelper::genRandomWeights(tspArgs);
   this->pi_init = generateInitialSolution(tspArgs);
   this->epi = 1;
-  this->startSec = clock();
+  this->startSec_timeT = clock();
   this->spendSec = 0.0;
   this->MAXepi = tspArgs.EPI_LIMIT;
   this->MAXsec = tspArgs.SEC_LIMIT;

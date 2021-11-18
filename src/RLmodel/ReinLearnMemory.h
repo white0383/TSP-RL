@@ -2,8 +2,8 @@
 #define TSP_RLMEMORY_H
 
 #include <vector>
-#include <queue>
 #include <ctime>
+#include <deque>
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
 
@@ -12,9 +12,9 @@ class ReinLearnMemory{
   public:
     vector<double> weights;
     Tour pi_init;
-    unsigned int epi;
+    unsigned int epi; 
     unsigned int MAXepi;
-    time_t startSec;
+    time_t startSec_timeT;
     double spendSec;
     double MAXsec;
     unsigned int time;
@@ -23,7 +23,7 @@ class ReinLearnMemory{
     unsigned int bestTour_time;
     double bestTour_dist;
     vector<int> lastTimeNodeActioned;
-    queue<double> distQueue;
+    deque<double> distQueue;
 
   public:
     ReinLearnMemory(const Arguments& tspArgs);

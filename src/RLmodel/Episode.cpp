@@ -10,11 +10,13 @@
 #include <vector>
 #include <numeric> // std::iota, std::inner_product
 #include <random>
+#include <deque>
 
 using namespace std;
 
 namespace episodeHelper{
-  vector<MDP> getInitReplayBuffer(const Arguments& tspArgs){
+  deque<MDP> getInitReplayBuffer(const Arguments& tspArgs){
+    deque<MDP> rstDeq;
     vector<MDP> rstVec;
     rstVec.reserve(tspArgs.TMAX);
     return rstVec;
@@ -38,6 +40,11 @@ namespace episodeHelper{
     rstVec2.reserve(tspArgs.T);
     return rstVec2;
   }
+
+  void updateReplayBuffer(deque<MDP>& repBuff, MDP newMDP, const Arguments& tspArgs){
+    if(repBuff.size() == tspArgs.MMAX) repBuff.pop_front();
+    repBuff.emplace_back(newMDP);
+  }
 };
 
 Episode::Episode(const Arguments& tspArgs){
@@ -49,7 +56,7 @@ Episode::Episode(const Arguments& tspArgs){
 };
 
 /*
-void Episode::generateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& tspArgs){
+void Episode::updateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& tspArgs){
   Tour pi_step = RLmemory.getPiInit();
   Tour pi_step_star = searchLocalOpt(tspArgs, pi_step);
 
