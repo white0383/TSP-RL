@@ -4,8 +4,9 @@
 #include <ctime>
 
 #include "./model/Arguments.h"
-#include "./RLmodel/ReinLearnMemory.h"
-#include "./RLmodel/Episode.h"
+//#include "./RLmodel/ReinLearnMemory.h"
+//#include "./RLmodel/Episode.h"
+#include "./RLmodel/LinearFittedQIteration.h"
 
 using namespace std;
 
@@ -25,11 +26,9 @@ vector<double> learnLinearQfunction(const Arguments& tspArgs){
     RLmemory.setNextPiInit(episode); // 이것도 readyNextEpi로 넣기
     //RLmemory.epi++; //RLmemory.readyNextEpisode(episode, tspArgs);
   }
-
   return RLmemory.getWeights();
 }
 */
-
 
 int main(int argc, char** argv){
   /************************************/
@@ -43,7 +42,11 @@ int main(int argc, char** argv){
   //Reinforcement Learning
   //vector<double> weight = learnLinearQfunction(tmpArgs);
 
-  cout << "hello" << endl;
+  LinearFittedQIteration* tmpLinQModel = new LinearFittedQIteration(tmpArgs);
+  tmpLinQModel->learn(tmpArgs);
+  //do something with constructed model
+  
+  delete tmpLinQModel;
 
   return 0;
 }

@@ -19,7 +19,7 @@ namespace episodeHelper{
     deque<MDP> rstDeq;
     vector<MDP> rstVec;
     rstVec.reserve(tspArgs.TMAX);
-    return rstVec;
+    return rstDeq;
   };
 
   //initialized in Zeros
