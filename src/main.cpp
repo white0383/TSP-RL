@@ -43,7 +43,8 @@ int main(int argc, char** argv){
   //vector<double> weight = learnLinearQfunction(tmpArgs);
 
   LinearFittedQIteration* tmpLinQModel = new LinearFittedQIteration(tmpArgs);
-  tmpLinQModel->learn(tmpArgs);
+
+  //tmpLinQModel->learn(tmpArgs);
   //do something with constructed model
   
   delete tmpLinQModel;

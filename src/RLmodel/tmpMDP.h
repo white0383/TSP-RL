@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 namespace StateHelper{
   /**
    * initialization of vector pi_vec and pi_inv_vec
@@ -96,8 +95,8 @@ namespace ActionHelper{
    *  if method == "PART" return genPartGreedy
    *  if method == "SAMP" return genSampleGreedy
    */ 
-  vector<pair<int,int> > genEpsGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
-  vector<pair<int,int> > genGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  vector<pair<int,int> > genEpsGreedy(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  vector<pair<int,int> > genGreedy(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
   /**
    * This method will be significantly slow
@@ -111,14 +110,14 @@ namespace ActionHelper{
    * Action features are calculated by only differential(差分)
    * of swaps (i.e. new candidate swap )
    */
-  vector<pair<int,int> > genFullGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  vector<pair<int,int> > genFullGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
   /**
    * Strategy:
    *  repeatly search M numbers of non-implicated swap of current best swaps
    *  until sigma == n/2 or no more better action found in M sampled swaps
    */
-  vector<pair<int,int> > genPartGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  vector<pair<int,int> > genPartGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
   /**
    * Strategy:
@@ -126,7 +125,7 @@ namespace ActionHelper{
    *  generate M ramdom swaps.
    *  Compare all of them, and use best scored one
    */
-  vector<pair<int,int> > genSampleGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  vector<pair<int,int> > genSampleGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
   /**
    * return ramdom swaps
@@ -177,7 +176,7 @@ namespace ActionHelper{
    * 
    * Finally, return (f1,f2,f3,f4,f5,f6)
    */
-  vector<double> getTmpActionFeatures(const vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, ReinLearnMemory& RLmemory,const Arguments& tspArgs);
+  vector<double> getTmpActionFeatures(const vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, LinearFittedQIteration& LinQ,const Arguments& tspArgs);
 
   /**
    * This function do the same thing of ActionHelper::getTmpActionFeatures, but this also updates actFeatures, pi_vec, pi_inv_vec. 
@@ -185,11 +184,11 @@ namespace ActionHelper{
    * So, it returns nothing
    * and initially operate actFeatures, pi_vec, pi_inv_vec
    */
-  void updateActionFeatures(vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  void updateActionFeatures(vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 }
 
 namespace MDPHelper{
-  double getReward(Tour& pi_star, ReinLearnMemory& RLmemory);
+  double getReward(Tour& pi_star, LinearFittedQIteration& LinQ);
 
   /**
    * Swap node p and q in pi
@@ -251,12 +250,12 @@ namespace MDPHelper{
    * So, while calculating average(Tau(P)),
    * max(Tau(P)), min(Tau(P)) can be also determined
    */
-  vector<double> getActionFeatures(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
-  vector<double> getActionFeatures(const vector<pair<int,int> >& swaps, Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  vector<double> getActionFeatures(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  vector<double> getActionFeatures(const vector<pair<int,int> >& swaps, Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
-  //vector<double> getStateFeatures(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  //vector<double> getStateFeatures(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
-  //vector<double> getFeatureVector(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs)
+  //vector<double> getFeatureVector(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs)
 
   /**
    * Qfunction( action value function) is a mapping 
@@ -285,9 +284,9 @@ namespace MDPHelper{
    * Q_1 is evaluateStateFeatures
    * Q_2 is evaluateActionFeatures
    */
-  double Qfunction(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
-  double evaluateActionFeatures(vector<double> actionFeatures, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
-  double evaluateStateFeatures(vector<double> stateFeatures, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+  double Qfunction(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  double evaluateActionFeatures(vector<double> actionFeatures, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  double evaluateStateFeatures(vector<double> stateFeatures, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 }
 
 class State{
@@ -305,7 +304,6 @@ class State{
 
     // perturber
     Tour perturb(Action& a, const Arguments& tspArgs);
-    Tour perturb(vector < pair<int,int> >& swaps, const Arguments& tspArgs);
 };
 
 class Action{
@@ -314,7 +312,7 @@ class Action{
     vector<pair <int, int> > swaps; // pairs of swapped indexes
 
   public:
-    Action(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs);
+    Action(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
     vector<pair <int, int> > getSwaps();
     int getSigma();
 };
@@ -325,6 +323,18 @@ class MDP{
     State state;
     Action action;
     double reward;
+};
+
+class FOOCLASS{
+  private:
+    int data1;
+    double data2;
+
+  public:
+    FOOCLASS(){
+      this->data1 = 1;
+      this->data2 = 1.0;
+    }
 };
 
 #endif // TSP_TMPMDP_H

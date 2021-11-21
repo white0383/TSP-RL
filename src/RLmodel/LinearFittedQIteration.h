@@ -11,14 +11,14 @@
 //predeclaration
 class State;
 class Action;
-class MDP;
+class MDP{};
 class LinearFittedQIteration;
 class DataSet;
 
 class LinearFittedQIteration{
   public:
     vector<double> weights;
-    deque<MDP> replayBuffer;
+    vector<MDP> replayBuffer;
 
     // real world's computation time
     time_t startTimeT;
@@ -38,7 +38,7 @@ class LinearFittedQIteration{
      */
     unsigned int time;
     //unsigned int MAXtime = +infinity
-    unsigned int step
+    unsigned int step;
     unsigned int MAXstep; // const
     unsigned int epi; 
     unsigned int MAXepi; // const
@@ -46,7 +46,7 @@ class LinearFittedQIteration{
     //For calculating feature vector and reward
     unsigned int bestTime;
     double bestDist;
-    vector<int> lastTimeNodeActioned;
+    vector<unsigned int> lastTimeNodeActioned;
     deque<double> distQueue; // maximum length is THETA in tspArgs
 
   public:
@@ -67,7 +67,7 @@ class LinearFittedQIteration{
      * Push_back prevMDP into ReplayBuffer
      * and pop_front if its size is bigger than MMAX
      */
-    void updateReplayBuffer(MDP prevMDP,const Arguments& tspArgs);
+    void updateReplayBuffer(MDP& prevMDP,const Arguments& tspArgs);
 
     /**
      * Update lastTimeNodeActioned by current action
@@ -112,7 +112,8 @@ class LinearFittedQIteration{
     void setPiInitCost(const Arguments& tspArgs);
     Tour getPiInit();
     void printWeights();
-}
+};
+
 
 class DataSet{
   public:
@@ -136,6 +137,7 @@ class DataSet{
 
   public:
     DataSet(const Arguments& tspArgs, deque<MDP>& replayBuffer, const vector<double> weights_old);
-}
+};
+
 
 #endif //TSP_LINFITQITE_H

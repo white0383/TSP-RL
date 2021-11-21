@@ -35,7 +35,7 @@ class Arguments {
     double GAMMA ; // parameter for calculating target values. in [0,1]
     double ALPHA ; // parameter in reward function. in [0,1]
     double SEC_LIMIT ; // Maximum value of second
-    double WEIGHTS_INITPARA ; // Interval of initial weight vector
+    double WEIGHTS_INITPARA ; // Interval of initial weight vector or Standard deviation of gaussian
     double EPS ; // parameter of epsilon greedy in Action constructor in [0,1]
 
     //==========================================

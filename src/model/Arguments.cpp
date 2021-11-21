@@ -49,7 +49,7 @@ vector<string> ACTION_GREEDY_METHOD_LIST {
 
 vector<string> WEIGHT_INIT_METHOD_LIST {
   "UNIFM", // Uniform distribution  U(-para/2,para/2)
-  "GAUSS"  // Gaussian distribution N(0,para)
+  "GAUSS"  // Gaussian distribution N(0,para) = N(mean, stddev)
 };
 
 bool verifyInputVectorLength(vector<string>& stringArgs, vector<unsigned int>& integerArgs, vector<double>& realArgs){
