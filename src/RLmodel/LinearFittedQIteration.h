@@ -7,13 +7,7 @@
 #include <utility> // std::pair
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
-
-//predeclaration
-class State;
-class Action;
-class MDP{};
-class LinearFittedQIteration;
-class DataSet;
+#include "tmpMDP.h"
 
 class LinearFittedQIteration{
   public:

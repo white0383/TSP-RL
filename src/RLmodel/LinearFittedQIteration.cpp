@@ -1,5 +1,4 @@
 #include "LinearFittedQIteration.h"
-#include "tmpMDP.h" // predeclaration
 #include "../helper/mt19937ar.h"
 #include "../model/Arguments.h"
 

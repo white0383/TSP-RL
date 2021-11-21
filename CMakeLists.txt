@@ -10,9 +10,6 @@ add_executable(tsp
   ./src/model/Distance.cpp
   ./src/model/Tour.cpp
   ./src/model/Arguments.cpp
-  #./src/RLmodel/Episode.cpp 
-  #./src/RLmodel/ReinLearnMemory.cpp 
-  #./src/RLmodel/MarkovDecisionProcess.cpp
   ./src/RLmodel/LinearFittedQIteration.cpp
   ./src/RLmodel/tmpMDP.cpp
   ./src/helper/FileIOHelper.cpp

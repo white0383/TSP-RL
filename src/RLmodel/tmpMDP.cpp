@@ -1,4 +1,5 @@
 #include "tmpMDP.h"
+#include "LinearFittedQIteration.h" //predeclaration
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
 #include "../model/Graph.h"

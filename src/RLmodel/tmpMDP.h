@@ -5,7 +5,13 @@
 #include <utility> //std::pair
 #include "../model/Tour.h"
 #include "../model/Arguments.h"
-#include "LinearFittedQIteration.h"
+
+//predeclaration
+class State;
+class Action;
+class MDP;
+class LinearFittedQIteration;
+class DataSet;
 
 using namespace std;
 

@@ -4,31 +4,9 @@
 #include <ctime>
 
 #include "./model/Arguments.h"
-//#include "./RLmodel/ReinLearnMemory.h"
-//#include "./RLmodel/Episode.h"
 #include "./RLmodel/LinearFittedQIteration.h"
 
 using namespace std;
-
-/**
- * fitted Q iteration algorithm to learn a linear action value function
- */
-/*
-vector<double> learnLinearQfunction(const Arguments& tspArgs){
-  ReinLearnMemory RLmemory = ReinLearnMemory(tspArgs); // declare ok, imple ok, test ok
-
-  while(RLmemory.checkTerminationCondition(tspArgs) == false){
-    Episode episode = Episode(tspArgs); // declare ok, imple ok,
-    episode.generateReplayBuffer(RLmemory, tspArgs); // declare ok
-    episode.selectSamples(RLmemory, tspArgs); // declare ok, imple ok
-    episode.generateTargetValues(RLmemory, tspArgs); // declare ok
-    RLmemory.learnWeightByLSM(episode, tspArgs); 
-    RLmemory.setNextPiInit(episode); // 이것도 readyNextEpi로 넣기
-    //RLmemory.epi++; //RLmemory.readyNextEpisode(episode, tspArgs);
-  }
-  return RLmemory.getWeights();
-}
-*/
 
 int main(int argc, char** argv){
   /************************************/
@@ -39,14 +17,16 @@ int main(int argc, char** argv){
   vector<double> tmpREA = {0.95, 0.95, 123.1, 100, 0.5};
   Arguments tmpArgs = Arguments(tmpSTR, tmpINT, tmpREA);
 
-  //Reinforcement Learning
-  //vector<double> weight = learnLinearQfunction(tmpArgs);
-
+  //Define LinQ model
   LinearFittedQIteration* tmpLinQModel = new LinearFittedQIteration(tmpArgs);
 
+  //Learn Q-function
   //tmpLinQModel->learn(tmpArgs);
+
   //do something with constructed model
+  cout << "hello~~" << endl;
   
+  //Free memory
   delete tmpLinQModel;
 
   return 0;
