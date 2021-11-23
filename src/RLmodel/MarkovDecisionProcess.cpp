@@ -1,9 +1,11 @@
-#include "./MarkovDecisionProcess.h"
+#include "MarkovDecisionProcess.h"
+#include "LinearFittedQIteration.h" //predeclaration
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
 #include "../model/Graph.h"
 #include "../model/Distance.h"
 #include "../helper/RandVec.hpp"
+#include "../solver/local_search/SearchLocalOpt.h"
 #include "../helper/mt19937ar.h" // DEBUG
 
 #include <vector>
@@ -11,7 +13,7 @@
 #include <utility> // std::pair
 #include <set>
 #include <algorithm> // std::min, std::max
-#include <limits.h> // INT_MAX, INT_MIN
+#include <limits.h> // INT_MAX, INT_MIN, UINT_MAX
 #include <cmath> // floor, sqrt
 #include <float.h> // DBL_MAX, DBL_MIN
 
@@ -102,13 +104,13 @@ pair<double,double> MDPHelper::getAddedDroppedWeights(vector<int>& pi, vector<in
   return rstPair; 
 }
 
-vector<double> MDPHelper::getActionFeatures(Action& a, State& s, ReinLearnMemory& RLmemory,const Arguments& tspArgs){
+vector<double> MDPHelper::getActionFeatures(Action& a, State& s, LinearFittedQIteration& LinQ,const Arguments& tspArgs){
   vector< pair<int,int> > swaps = a.getSwaps();
   Tour pi_star = s.getPiStar();
-  return getActionFeatures(swaps,pi_star,RLmemory,tspArgs);
+  return getActionFeatures(swaps,pi_star,LinQ,tspArgs);
 }
 
-vector<double> MDPHelper::getActionFeatures(const vector<pair<int,int> >& swaps, Tour& pi_star, ReinLearnMemory& RLmemory,const Arguments& tspArgs){
+vector<double> MDPHelper::getActionFeatures(const vector<pair<int,int> >& swaps, Tour& pi_star, LinearFittedQIteration& LinQ,const Arguments& tspArgs){
   double f1,f2,f3,f4,f5,f6;
 
   // calculate f1
@@ -139,17 +141,17 @@ vector<double> MDPHelper::getActionFeatures(const vector<pair<int,int> >& swaps,
     P.emplace_back(swap.second);
   }
 
-  int t = RLmemory.time;
-  vector<int> *Tau_pt = &(RLmemory.lastTimeNodeActioned);
-  int minTau = INT_MAX;
-  int maxTau = -1;
-  int sumTau = 0;
+  unsigned int t = LinQ.time;
+  vector<unsigned int> *Tau_pt = &(LinQ.lastTimeNodeActioned);
+  unsigned int minTau = UINT_MAX;
+  unsigned int maxTau = 0;
+  unsigned int sumTau = 0;
   double averageTau;
 
   for(int p : P){
-    int TauP = (*Tau_pt)[p];
+    unsigned int TauP = (*Tau_pt)[p];
     if(TauP < minTau) minTau = TauP;
-    if(TauP > maxTau) maxTau = TauP;
+    if(TauP >= maxTau) maxTau = TauP;
     sumTau += TauP;
   }
 
@@ -164,30 +166,30 @@ vector<double> MDPHelper::getActionFeatures(const vector<pair<int,int> >& swaps,
   return actionFeatures;
 }
 
-double MDPHelper::evaluateActionFeatures(vector<double> actionFeatures, ReinLearnMemory& RLmemory,const Arguments& tspArgs){
+double MDPHelper::evaluateActionFeatures(vector<double> actionFeatures, LinearFittedQIteration& LinQ,const Arguments& tspArgs){
   double rst_actionFeature_value = 0.0;
 
   auto ite_actionWeights_begin = 
-    RLmemory.weights.begin() +
+    LinQ.weights.begin() +
     1 +
     3 +
     tspArgs.KSMP +
     tspArgs.OMEGA;
   
   int afIndex = 0;
-  for(auto ite_wa = ite_actionWeights_begin; ite_wa != RLmemory.weights.end(); ++ite_wa) rst_actionFeature_value += actionFeatures[afIndex++] * (*ite_wa); 
+  for(auto ite_wa = ite_actionWeights_begin; ite_wa != LinQ.weights.end(); ++ite_wa) rst_actionFeature_value += actionFeatures[afIndex++] * (*ite_wa); 
 
   return rst_actionFeature_value;
 }
 
-double MDPHelper::evaluateStateFeatures(vector<double> stateFeatures, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+double MDPHelper::evaluateStateFeatures(vector<double> stateFeatures, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   double rst_stateFeature_value = 0.0;
 
   auto ite_stateWeights_begin =
-    RLmemory.weights.begin() +
+    LinQ.weights.begin() +
     1;
   auto ite_stateWeights_end = 
-    RLmemory.weights.begin() +
+    LinQ.weights.begin() +
     1 +
     3 +
     tspArgs.KSMP +
@@ -199,19 +201,19 @@ double MDPHelper::evaluateStateFeatures(vector<double> stateFeatures, ReinLearnM
   return rst_stateFeature_value; 
 }
 
-double MDPHelper::Qfunction(Action& a, State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+double MDPHelper::Qfunction(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   double rst_qvalue=0.0;
 
   //get w_0
-  double w_0 = RLmemory.weights[0];
+  double w_0 = LinQ.weights[0];
 
   //calculate q_s
   //vector<double> stateFeatures = MDPHelper::getStateFeatures(??);
-  //double qvalue_s = MDPHelper::evaluateStateFeatures(stateFeatures, RLmemory, tspArgs);
+  //double qvalue_s = MDPHelper::evaluateStateFeatures(stateFeatures, LinQ, tspArgs);
 
   //calculate q_a
-  vector<double> actionFeatures = MDPHelper::getActionFeatures(a,s,RLmemory,tspArgs);
-  double qvalue_a = MDPHelper::evaluateActionFeatures(actionFeatures,RLmemory,tspArgs);
+  vector<double> actionFeatures = MDPHelper::getActionFeatures(a,s,LinQ,tspArgs);
+  double qvalue_a = MDPHelper::evaluateActionFeatures(actionFeatures,LinQ,tspArgs);
 
   //sum them and return
   rst_qvalue = w_0 + qvalue_a; //+qvalue_s
@@ -228,6 +230,13 @@ State::State(Tour _pi, Tour _pi_star){
     exit(1);
   }
 };
+
+State::State(Tour& pi, unsigned int time, const Arguments& tspArgs){
+  this->pi = pi;
+  this->pi_star = searchLocalOpt(tspArgs, pi);
+  this->distPiStar = this->pi_star.getScaledCost();
+  this->time = time;
+}
 
 Tour State::getPi(){
   return this->pi;
@@ -261,24 +270,6 @@ void StateHelper::eraseDummiesInPiVec(vector<int>& pi_vec){
   pi_vec.erase(pi_vec.begin());
 }
 
-/* State::perturb
-Tour State::perturb(Action& a, const Arguments& tspArgs){
-  vector<pair<int,int> > swapsCopy = a.getSwaps();
-  return State::perturb(swapsCopy,tspArgs);
-}
-Tour State::perturb(vector<pair<int,int> >& swaps, const Arguments& tspArgs){
-  vector<int> pi_vec, pi_inv_vec;
-  StateHelper::initPiAndPiInv(this->pi_star, pi_vec, pi_inv_vec);
-  for(auto swap : swaps){
-    StateHelper::subPerturb(pi_vec,pi_inv_vec,swap);
-  }
-  StateHelper::tidyPiVec(pi_vec);
-  Tour perturbedTour(pi_vec,tspArgs.V);
-
-  return perturbedTour;
-}
-*/
-
 //==== Action ===================================
 int ActionHelper::encodeSwap(pair<int,int> swap, int n){
   int a = swap.first;
@@ -310,7 +301,7 @@ pair<int,int> ActionHelper::decodeSwapCode(int swapCode, int n){
   return pair<int,int>(a,b);
 }
 
-vector<double> ActionHelper::getTmpActionFeatures(const vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, ReinLearnMemory& RLmemory,const Arguments& tspArgs){
+vector<double> ActionHelper::getTmpActionFeatures(const vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, LinearFittedQIteration& LinQ,const Arguments& tspArgs){
   double f1, f2,f3,f4,f5,f6;
   
   // calculate f1
@@ -324,9 +315,9 @@ vector<double> ActionHelper::getTmpActionFeatures(const vector<double>& actFeatu
   // calculate f4, f5, f6
   int p = swap.first;
   int q = swap.second;
-  int t = RLmemory.time;
-  int Tau_p = RLmemory.lastTimeNodeActioned.at(p);
-  int Tau_q = RLmemory.lastTimeNodeActioned.at(q);
+  unsigned int t = LinQ.time;
+  unsigned int Tau_p = LinQ.lastTimeNodeActioned.at(p);
+  unsigned int Tau_q = LinQ.lastTimeNodeActioned.at(q);
   double t_p = (double)(t - Tau_p);
   double t_q = (double)(t - Tau_q);
   f4 = min({actFeatures[3], t_p, t_q});
@@ -339,8 +330,8 @@ vector<double> ActionHelper::getTmpActionFeatures(const vector<double>& actFeatu
   return tmpActionFeatures;
 }
 
-void ActionHelper::updateActionFeatures(vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
-  vector<double> updatedActFs = ActionHelper::getTmpActionFeatures(actFeatures, pi_vec,pi_inv_vec,swap,RLmemory,tspArgs);
+void ActionHelper::updateActionFeatures(vector<double>& actFeatures, vector<int>& pi_vec, vector<int>& pi_inv_vec, pair<int,int>& swap, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  vector<double> updatedActFs = ActionHelper::getTmpActionFeatures(actFeatures, pi_vec,pi_inv_vec,swap,LinQ,tspArgs);
 
   //update actFeature
   actFeatures.clear();
@@ -358,7 +349,7 @@ void ActionHelper::updateActionFeatures(vector<double>& actFeatures, vector<int>
   pi_inv_vec[p_index] = j_order;
 }
 
-vector<pair<int,int> > ActionHelper::genFullGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+vector<pair<int,int> > ActionHelper::genFullGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   /* 
     swap is a pair of node's index which are going to be swapped
     code is encoded swap, so it is integer
@@ -393,8 +384,8 @@ vector<pair<int,int> > ActionHelper::genFullGreedy(Tour& pi_star, ReinLearnMemor
       if(codeSet.find(tmp_code) != codeSet.end()) continue;
 
       tmp_swap = ActionHelper::decodeSwapCode(tmp_code,n);
-      tmp_actionFeatures = ActionHelper::getTmpActionFeatures(actionFeatures, pi_vec, pi_inv_vec, tmp_swap, RLmemory, tspArgs);
-      tmp_score = MDPHelper::evaluateActionFeatures(tmp_actionFeatures,RLmemory,tspArgs);
+      tmp_actionFeatures = ActionHelper::getTmpActionFeatures(actionFeatures, pi_vec, pi_inv_vec, tmp_swap, LinQ, tspArgs);
+      tmp_score = MDPHelper::evaluateActionFeatures(tmp_actionFeatures,LinQ,tspArgs);
 
       if(tmp_score > bestScore){
         bestScore = tmp_score;
@@ -409,14 +400,14 @@ vector<pair<int,int> > ActionHelper::genFullGreedy(Tour& pi_star, ReinLearnMemor
     pair<int,int> nextSwap = ActionHelper::decodeSwapCode(bestCode,n);
     codeSet.insert(bestCode);
     rst_swaps.push_back(nextSwap);
-    ActionHelper::updateActionFeatures(actionFeatures, pi_vec, pi_inv_vec, nextSwap, RLmemory, tspArgs);
+    ActionHelper::updateActionFeatures(actionFeatures, pi_vec, pi_inv_vec, nextSwap, LinQ, tspArgs);
   }
 
   return rst_swaps;
 }
 
 
-vector<pair<int,int> > ActionHelper::genPartGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+vector<pair<int,int> > ActionHelper::genPartGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   //declare variables
   int n = tspArgs.V.getN();
   const int codeMax = (n*n -n) / 2; // Maximum swapCode
@@ -444,8 +435,8 @@ vector<pair<int,int> > ActionHelper::genPartGreedy(Tour& pi_star, ReinLearnMemor
 
     for(int tmp_code : tmp_codes){
       tmp_swap = ActionHelper::decodeSwapCode(tmp_code,n);
-      tmp_actionFeatures = ActionHelper::getTmpActionFeatures(actionFeatures, pi_vec,pi_inv_vec,tmp_swap,RLmemory,tspArgs);
-      tmp_score = MDPHelper::evaluateActionFeatures(tmp_actionFeatures, RLmemory, tspArgs);
+      tmp_actionFeatures = ActionHelper::getTmpActionFeatures(actionFeatures, pi_vec,pi_inv_vec,tmp_swap,LinQ,tspArgs);
+      tmp_score = MDPHelper::evaluateActionFeatures(tmp_actionFeatures, LinQ, tspArgs);
 
       if(tmp_score > bestScore){
         bestScore = tmp_score;
@@ -459,13 +450,13 @@ vector<pair<int,int> > ActionHelper::genPartGreedy(Tour& pi_star, ReinLearnMemor
     pair<int,int> nextSwap = ActionHelper::decodeSwapCode(bestCode, n);
     codeSet.insert(bestCode);
     rst_swaps.push_back(nextSwap);
-    ActionHelper::updateActionFeatures(actionFeatures, pi_vec, pi_inv_vec, nextSwap, RLmemory, tspArgs);
+    ActionHelper::updateActionFeatures(actionFeatures, pi_vec, pi_inv_vec, nextSwap, LinQ, tspArgs);
   }
 
   return rst_swaps;
 }
 
-vector<pair<int,int> > ActionHelper::genSampleGreedy(Tour& pi_star, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+vector<pair<int,int> > ActionHelper::genSampleGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   //declare variables
   int n = tspArgs.V.getN();
   const int codeMax = (n*n -n) / 2; // Maximum swapCode
@@ -486,8 +477,8 @@ vector<pair<int,int> > ActionHelper::genSampleGreedy(Tour& pi_star, ReinLearnMem
         tmp_swaps.emplace_back(ActionHelper::decodeSwapCode(tmp_code,n));
       }
 
-      vector<double> tmp_actFs = MDPHelper::getActionFeatures(tmp_swaps, pi_star, RLmemory, tspArgs);
-      tmp_score = MDPHelper::evaluateActionFeatures(tmp_actFs, RLmemory, tspArgs);
+      vector<double> tmp_actFs = MDPHelper::getActionFeatures(tmp_swaps, pi_star, LinQ, tspArgs);
+      tmp_score = MDPHelper::evaluateActionFeatures(tmp_actFs, LinQ, tspArgs);
 
       if(tmp_score > bestScore){
         bestScore = tmp_score;
@@ -500,15 +491,15 @@ vector<pair<int,int> > ActionHelper::genSampleGreedy(Tour& pi_star, ReinLearnMem
   return rst_swaps;
 }
 
-vector<pair<int,int> > ActionHelper::genGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+vector<pair<int,int> > ActionHelper::genGreedy(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   Tour pi_star = s.getPiStar();
 
   if(tspArgs.ACTION_GREEDY_METHOD == "FULL"){
-    return ActionHelper::genFullGreedy(pi_star,RLmemory,tspArgs);
+    return ActionHelper::genFullGreedy(pi_star,LinQ,tspArgs);
   } else if(tspArgs.ACTION_GREEDY_METHOD == "PART"){
-    return ActionHelper::genPartGreedy(pi_star,RLmemory,tspArgs);
+    return ActionHelper::genPartGreedy(pi_star,LinQ,tspArgs);
   } else if(tspArgs.ACTION_GREEDY_METHOD == "SAMP"){
-    return ActionHelper::genSampleGreedy(pi_star,RLmemory,tspArgs);
+    return ActionHelper::genSampleGreedy(pi_star,LinQ,tspArgs);
   }
 
   // statements below are just for c++ grammar
@@ -537,12 +528,12 @@ vector<pair<int,int> > ActionHelper::genRandom(const Arguments& tspArgs){
   return rst_swaps;
 }
 
-vector<pair<int,int> > ActionHelper::genEpsGreedy(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
+vector<pair<int,int> > ActionHelper::genEpsGreedy(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   double pr = genrand_real3();
   if(pr < tspArgs.EPS){
     return ActionHelper::genRandom(tspArgs);
   } else {
-    return ActionHelper::genGreedy(s,RLmemory,tspArgs);
+    return ActionHelper::genGreedy(s,LinQ,tspArgs);
   }
 
   // statements below are just for c++ grammar
@@ -554,8 +545,8 @@ vector<pair<int,int> > ActionHelper::genEpsGreedy(State& s, ReinLearnMemory& RLm
   return rst_dummy;  
 }
 
-Action::Action(State& s, ReinLearnMemory& RLmemory, const Arguments& tspArgs){
-  this->swaps = ActionHelper::genEpsGreedy(s,RLmemory,tspArgs);
+Action::Action(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  this->swaps = ActionHelper::genEpsGreedy(s,LinQ,tspArgs);
   this->sigma = this->swaps.size();
 }
 

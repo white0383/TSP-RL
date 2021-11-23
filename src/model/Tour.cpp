@@ -58,7 +58,7 @@ bool Tour::isCompleteTour(const Graph& g){
 double Tour::getCost() {
   return this->cost;
 };
-double Tour::getScaledCoset() {
+double Tour::getScaledCost() {
   return this->scaledCost;
 }
 
@@ -79,6 +79,11 @@ void Tour::setCost(const Graph &g) {
 
   this->cost = cost;
 };
+
+void Tour::setScaledCost(double _scost){
+  cout << "here :: " << _scost << endl;
+  this->scaledCost = _scost;
+}
 
 void Tour::setScaledCost(const Graph& g){
   double rst_scaledCost = 0;

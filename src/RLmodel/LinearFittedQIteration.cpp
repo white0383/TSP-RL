@@ -1,6 +1,7 @@
 #include "LinearFittedQIteration.h"
 #include "../helper/mt19937ar.h"
 #include "../model/Arguments.h"
+#include "../solver/initial_solution/GenerateInitialSolution.h"
 
 #include <ctime>
 #include <vector>
@@ -11,8 +12,10 @@
 
 using namespace std;
 
-//========= class LinQ ==========
+//========= LinQHelper ===============================================
 namespace LinQHelper {
+
+//===================== LinQ Constructor =============================
   /**
    * Generate weight vecotr which has random double-type values
    * there values are included in [ (+-) tspArgs.WEIGHTINTERVAL/2]
@@ -77,8 +80,13 @@ namespace LinQHelper {
     rstDeq.push_back(DBL_MAX); 
     return rstDeq;
   }
+
+//===================== LinQ.Learn ==================================
+
+
 }
 
+//========= LinQ Member ==============================================
 LinearFittedQIteration::LinearFittedQIteration(const Arguments& tspArgs){
   this->weights = LinQHelper::genRandomWeights(tspArgs);
   this->replayBuffer = LinQHelper::genInitReplayBuffer();
@@ -100,4 +108,42 @@ LinearFittedQIteration::LinearFittedQIteration(const Arguments& tspArgs){
   this->distQueue = LinQHelper::genInitDistQueue(tspArgs);
 };
 
-//======== class DataSet ========
+void LinearFittedQIteration::learn(const Arguments& tspArgs){
+  cout << "learn is fun" << endl;
+  Tour pi_init = generateInitialSolution(tspArgs);
+  pi_init.setCost(tspArgs.V);
+  //State s_prev = State(pi_init, this->time); 
+  //State(Tour pi, unsigned int time) = (pi, pi_star, dist(pi_star), time) -> use this
+
+  //this->distQueue.push_back(s_prev.distPiStar);
+
+  while(LinearFittedQIteration::checkTerminationCondition(tspArgs) == false){
+    for(this->step = 1;this->step <= this->MAXstep;this->step++){
+      //Action a_prev = Action(s_prev, *this, tspArgs);
+      //State s_next = State(s_prev, a_prev, this->time) = (s_prev.perturb(a_prev), s_prev.perturb(a_prev)_star, dist(that), time+1)
+      //double r_prev = MDPHelper::calcReward(s_next, *this, tspArgs);
+      //vector<double> f_prev = MDPHelper::getFeatureVector(s_prev, a_prev, *this);
+      //MDP mdp_prev = MDP(s_prev, a_prev, r_prev, s_next, f_prev, *this);
+      //this->updateModelInfo(mdp_prev, tspArgs, s_prev, s_next)
+    }
+    //DataSet dataset = DataSet(this->weights, this->replayBuffer, tspArgs)
+    //this->updateWeights(dataset);
+  }
+
+}
+
+  bool LinearFittedQIteration::checkTerminationCondition(const Arguments& tspArgs){
+    if(tspArgs.TERMINATE_METHOD == "EPI"){
+      return (this->epi > this->MAXepi);
+    }else if(tspArgs.TERMINATE_METHOD == "SEC"){
+      return (this->spendSec > this->MAXspendSec);
+    }
+
+    // statements below are just for c++ grammar
+    // Only when Acguments' initialization has problem, 
+    // below statement will run.
+    cout << "Error : ReinLearnMemory::checkTerminationCondition invalid termination condition " << endl;
+    cout << "Your input TERMINATE_METHOD is \"" << tspArgs.TERMINATE_METHOD <<"\""<< endl;
+    exit(1);    
+  }
+//========= DataSet Member ===========================================

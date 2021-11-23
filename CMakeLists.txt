@@ -11,7 +11,7 @@ add_executable(tsp
   ./src/model/Tour.cpp
   ./src/model/Arguments.cpp
   ./src/RLmodel/LinearFittedQIteration.cpp
-  ./src/RLmodel/tmpMDP.cpp
+  ./src/RLmodel/MarkovDecisionProcess.cpp
   ./src/helper/FileIOHelper.cpp
   ./src/helper/mt19937ar.cpp
   ./src/solver/initial_solution/GenerateInitialSolution.cpp

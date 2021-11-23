@@ -92,7 +92,7 @@ class Tour{
      * @return this->cost
      */
     double getCost();
-    double getScaledCoset();
+    double getScaledCost();
 
     /**
      * Calculate Tour's cost
@@ -101,6 +101,7 @@ class Tour{
      */
     void setCost(const Graph &g);
     void setScaledCost(const Graph &g);
+    void setScaledCost(double _scost);
 
     /**
      * Get tour vector of this object

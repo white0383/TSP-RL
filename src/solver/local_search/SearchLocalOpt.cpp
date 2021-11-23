@@ -4,9 +4,9 @@
  * Details in below
  * 
  * 1 2OPT : 2-opt -> search neighborhood in sequence
- * 
- * ----- not yet implemented (written in 2021 11 13 15:15)
  * 2 F2OPT : fast 2-opt -> improved 2-opt suggested by haraguchi. prof 
+ * 5 SF2OPT : scaled fast 2-opt -> fast 2-opt using scaled distance
+ * ----- not yet implemented (written in 2021 11 13 15:15)
  * 3 3OPT : 3-opt
  * 4 LK : Lin–Kernighan method
  */
@@ -17,6 +17,7 @@
 
 #include "./method/TwoOpt.h"
 #include "./method/FastTwoOpt.h"
+#include "./method/ScaledFastTwoOpt.h"
 //#include "./method/RandomTwoOpt.h"
 //#include "./method/ThreeOpt.h"
 //#include "./method/LinKernighan.h"
@@ -38,11 +39,10 @@ Tour searchLocalOpt(const Graph& g, const string& method, Tour& pi){
   
   if(method.compare("2OPT") == 0) {
     return twoOpt(g, pi);
-  //######### BEGIN: NOT YET IMPLEMENTED
   }else if (method.compare("F2OPT") == 0){
     return fastTwoOpt(g,pi);
+  //######### BEGIN: NOT YET IMPLEMENTED
   //}else if (method.compare("3OPT") == 0){
-
   //}else if (method.compare("LK") == 0){
   //######### END: NOT YET IMPLEMENTED
   }else {
@@ -68,11 +68,12 @@ Tour searchLocalOpt(const Arguments& tspArgs, Tour& pi){
   string method = tspArgs.LOCAL_SEARCH_METHOD;
   if(method.compare("2OPT") == 0) {
     return twoOpt(tspArgs.V, pi);
-  //######### BEGIN: NOT YET IMPLEMENTED
   }else if (method.compare("F2OPT") == 0){
     return fastTwoOpt(tspArgs.V, pi);
+  } else if (method.compare("SF2OPT") == 0){
+    return scaledFastTwoOpt(tspArgs, pi);
+  //######### BEGIN: NOT YET IMPLEMENTED
   //}else if (method.compare("3OPT") == 0){
-
   //}else if (method.compare("LK") == 0){
   //######### END: NOT YET IMPLEMENTED
   }else {
@@ -81,3 +82,4 @@ Tour searchLocalOpt(const Arguments& tspArgs, Tour& pi){
     exit(1);
   }
 }
+

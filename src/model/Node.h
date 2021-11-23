@@ -36,6 +36,8 @@ class ScaledNode {
   double y = 0.0;
 
   public:
+  ScaledNode() = default;
+
   ScaledNode(int index, double x, double y);
 
   void printScaledNode();

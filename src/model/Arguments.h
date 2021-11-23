@@ -37,6 +37,7 @@ class Arguments {
     double SEC_LIMIT ; // Maximum value of second
     double WEIGHTS_INITPARA ; // Interval of initial weight vector or Standard deviation of gaussian
     double EPS ; // parameter of epsilon greedy in Action constructor in [0,1]
+    double EPS_SF2OPT; // parametor in scaled fast 2-opt operator. skip swap when variation of distance is smaller than EPS_SF2OPT
 
     //==========================================
     //===== Arguments that are calculated ======

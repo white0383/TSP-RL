@@ -11,7 +11,7 @@ using namespace std;
 
 #define STRINUM 6
 #define INTENUM 6
-#define REALNUM 5
+#define REALNUM 6
 
 vector<string> INIT_SOLUTION_METHOD_LIST = {
   "RT", //Random Tour
@@ -31,6 +31,7 @@ vector<string> INIT_SOLUTION_METHOD_LIST = {
 vector<string> LOCAL_SEARCH_METHOD_LIST {
   "2OPT", //2-opt -> search neighborhood in sequence
   "F2OPT", //fast 2-opt -> improved 2-opt suggested by haraguchi sensei
+  "SF2OPT", //scaled fast 2-opt -> fast 2-opt using scaled distance
   //----- not yet implemented (2021 11 13)---------
   "3OPT", //3-opt
   "LK" //Lin–Kernighan method
@@ -159,13 +160,14 @@ bool verifyInputData(vector<string>& stringArgs, vector<unsigned int>& integerAr
       throw expVec;     
     }
 
-    //Check parametor of weight vector initialization is positive
+    //Check parametor of weight vector initialization and SF2OPT are non-negative
     double WEIGHTS_INITPARA = realArgs[3];
-    if(WEIGHTS_INITPARA < 0){
-      string expName = "ERROR : improper WEIGHTS_INITPARA value";
-      string expDesc = "please check 4th double argument";
-      string expDesc2 = "your input is WEIGHTS_INITPARA : " + to_string(WEIGHTS_INITPARA);
-      string expDesc3 = "it should be positive";
+    double EPS_SF2OPT = realArgs[5];
+    if((WEIGHTS_INITPARA < 0 ) || (EPS_SF2OPT < 0)){
+      string expName = "ERROR : improper WEIGHTS_INITPARA or EPS_SF2OPT value";
+      string expDesc = "please check 4,6th double argument";
+      string expDesc2 = "your input is WEIGHTS_INITPARA : " + to_string(WEIGHTS_INITPARA) + " EPS_SF2OPT : " + to_string(EPS_SF2OPT);
+      string expDesc3 = "they should be non-negative";
       vector<string> expVec = {expName,expDesc,expDesc2,expDesc3};
       throw expVec;  
     }
@@ -204,6 +206,7 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
     this->SEC_LIMIT = realArgs[2];
     this->WEIGHTS_INITPARA = realArgs[3];
     this->EPS = realArgs[4];
+    this->EPS_SF2OPT = realArgs[5];
 
     init_genrand(SEED);
 

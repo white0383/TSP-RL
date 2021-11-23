@@ -7,7 +7,7 @@
 #include <utility> // std::pair
 #include "../model/Arguments.h"
 #include "../model/Tour.h"
-#include "tmpMDP.h"
+#include "MarkovDecisionProcess.h"
 
 class LinearFittedQIteration{
   public:
@@ -95,7 +95,7 @@ class LinearFittedQIteration{
     void updateDistQueue(double dist_piStar_next, const Arguments& tstArgs);
     
     /**
-     * updata weights vector using least square method
+     * update weights vector using least square method
      */
     void updateWeights(const DataSet& dataSet, const Arguments& tspArgs);
 
@@ -103,9 +103,6 @@ class LinearFittedQIteration{
     vector<double> getWeights();
 
     //For Debugging
-    void setPiInitCost(const Arguments& tspArgs);
-    Tour getPiInit();
-    void printWeights();
 };
 
 
