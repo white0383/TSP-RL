@@ -21,4 +21,5 @@ add_executable(tsp
   ./src/solver/local_search/SearchLocalOpt.cpp
   ./src/solver/local_search/method/TwoOpt.cpp
   ./src/solver/local_search/method/FastTwoOpt.cpp
+  ./src/solver/local_search/method/ScaledFastTwoOpt.cpp
 )

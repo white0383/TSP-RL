@@ -111,23 +111,65 @@ LinearFittedQIteration::LinearFittedQIteration(const Arguments& tspArgs){
 void LinearFittedQIteration::learn(const Arguments& tspArgs){
   cout << "learn is fun" << endl;
   Tour pi_init = generateInitialSolution(tspArgs);
-  pi_init.setCost(tspArgs.V);
-  //State s_prev = State(pi_init, this->time); 
-  //State(Tour pi, unsigned int time) = (pi, pi_star, dist(pi_star), time) -> use this
-
-  //this->distQueue.push_back(s_prev.distPiStar);
+  pi_init.setScaledCost(tspArgs.V);
+  State s_prev = State(pi_init,this->time,tspArgs);
+  this->distQueue.push_back(s_prev.distPiStar);
 
   while(LinearFittedQIteration::checkTerminationCondition(tspArgs) == false){
     for(this->step = 1;this->step <= this->MAXstep;this->step++){
-      //Action a_prev = Action(s_prev, *this, tspArgs);
-      //State s_next = State(s_prev, a_prev, this->time) = (s_prev.perturb(a_prev), s_prev.perturb(a_prev)_star, dist(that), time+1)
-      //double r_prev = MDPHelper::calcReward(s_next, *this, tspArgs);
+      cout << "#####time : " << this->time << " begin " << endl;
+      Action a_prev = Action(s_prev, *this, tspArgs);
+      State s_next = State(s_prev, a_prev, this->time, tspArgs);
+
+      Tour pi_cp = s_prev.getPi();
+      Tour pistar_cp = s_prev.getPiStar();
+      pi_cp.setScaledCost(tspArgs.V);
+      pistar_cp.setScaledCost(tspArgs.V);
+      double pi_scost = s_prev.pi.getScaledCost();
+      double pistar_scost = s_prev.pi_star.getScaledCost();
+      double pi_real_scost = pi_cp.getScaledCost();
+      double pistar_real_scost = pistar_cp.getScaledCost();
+
+      //double to_gap = pi_scost - pistar_scost;
+      //double to_real_gap = pi_real_scost - pistar_real_scost;
+      //cout << "2opt : mine : " << to_gap << endl;
+      //cout << "       real : " << to_real_gap << endl;
+
+      Tour pinext_cp = s_next.getPi();
+      pinext_cp.setScaledCost(tspArgs.V);
+
+      double pinext_scost = s_next.pi.getScaledCost();
+      double pinext_real_scost = pinext_cp.getScaledCost();
+      double pt_gap = pinext_scost - pistar_scost;
+      double pt_real_gap = pinext_real_scost - pistar_real_scost;
+      if(abs(pt_gap - pt_real_gap) >= 0.001) {
+        cout << "perturb ERROR!!!" << endl;
+        cout << "pi : mine : " << pi_scost << endl;
+        cout << "     real : " << pi_real_scost << endl;
+        cout << "ps : mine : " << pistar_scost << endl;
+        cout << "     real : " << pistar_real_scost << endl;
+        cout << "pert : mine : " << pt_gap << endl;
+        cout << "       real : " << pt_real_gap << endl;
+      } else {
+        cout << "perturb OOKKK!!!" << endl;
+      }
+      
+
+      s_prev = s_next;
+      double r_prev = MDPHelper::getReward(s_next,*this,tspArgs);
+
       //vector<double> f_prev = MDPHelper::getFeatureVector(s_prev, a_prev, *this);
       //MDP mdp_prev = MDP(s_prev, a_prev, r_prev, s_next, f_prev, *this);
       //this->updateModelInfo(mdp_prev, tspArgs, s_prev, s_next)
+      
+      //FOR DEBUG
+      cout << "#####time : " << this->time << " finish " << endl << endl;
+      this->time++;
+      this->distQueue.push_back(s_prev.distPiStar);
     }
     //DataSet dataset = DataSet(this->weights, this->replayBuffer, tspArgs)
     //this->updateWeights(dataset);
+    this->epi++;
   }
 
 }

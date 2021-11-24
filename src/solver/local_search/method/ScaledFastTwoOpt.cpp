@@ -5,6 +5,7 @@
 #include <numeric> // std::iota
 #include <random> // std::mt19937
 #include <algorithm> // std::shuffle
+#include <cfloat> // DBL_MAX
 
 #include "ScaledFastTwoOpt.h"
 #include "../../../model/Distance.h"
@@ -45,6 +46,11 @@ Tour scaledFastTwoOpt(const Arguments& tspArgs, Tour& pi){
   int cityNum = pi.getSize();
   bool improved = true;
   double eps = tspArgs.EPS_SF2OPT;
+  
+  if(pi.getScaledCost() == DBL_MAX){
+    cout << "WARNING : SF2OPT pi.scost is not calculated" << endl;
+    pi.setScaledCost(tspArgs.V);
+  }
   double distPiStar = pi.getScaledCost();
 
   vector<int> pi_vec = pi.getTour();

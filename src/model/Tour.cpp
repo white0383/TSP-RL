@@ -81,7 +81,6 @@ void Tour::setCost(const Graph &g) {
 };
 
 void Tour::setScaledCost(double _scost){
-  cout << "here :: " << _scost << endl;
   this->scaledCost = _scost;
 }
 

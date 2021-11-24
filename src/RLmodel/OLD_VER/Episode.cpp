@@ -55,24 +55,6 @@ Episode::Episode(const Arguments& tspArgs){
   this->step = 1;
 };
 
-/*
-void Episode::updateReplayBuffer(ReinLearnMemory& RLmemory ,const Arguments& tspArgs){
-  Tour pi_step = RLmemory.getPiInit();
-  Tour pi_step_star = searchLocalOpt(tspArgs, pi_step);
-
-  for(int step=1;step < tspArgs.TMAX+1;step++){
-    State s_step = State(pi_step, pi_step_star);
-    Action a_step = Action(s_step, RLmemory, tspArgs);
-    pi_step = s_step.perturb(a_step);
-    pi_step_star = searchLocalOpt(tspArgs, pi_step);
-    double r_step = MDPHelper::getReward(pi_step_star, RLmemory);
-    MDP MDP_step = MDP(RLmemory, tspArgs, s_step, a_step, r_step);
-    replayBuffer.emplace_back(MDP_step);
-    RLmemory.time++;
-  }
-};
-*/
-
 void Episode::selectSamples(const Arguments& tspArgs){
   // generate {0,1, ... , TMAX-1} and shuffle it
   vector<int> tmpVec(tspArgs.TMAX);

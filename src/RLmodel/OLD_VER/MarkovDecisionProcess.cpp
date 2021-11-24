@@ -261,24 +261,6 @@ void StateHelper::eraseDummiesInPiVec(vector<int>& pi_vec){
   pi_vec.erase(pi_vec.begin());
 }
 
-/* State::perturb
-Tour State::perturb(Action& a, const Arguments& tspArgs){
-  vector<pair<int,int> > swapsCopy = a.getSwaps();
-  return State::perturb(swapsCopy,tspArgs);
-}
-Tour State::perturb(vector<pair<int,int> >& swaps, const Arguments& tspArgs){
-  vector<int> pi_vec, pi_inv_vec;
-  StateHelper::initPiAndPiInv(this->pi_star, pi_vec, pi_inv_vec);
-  for(auto swap : swaps){
-    StateHelper::subPerturb(pi_vec,pi_inv_vec,swap);
-  }
-  StateHelper::tidyPiVec(pi_vec);
-  Tour perturbedTour(pi_vec,tspArgs.V);
-
-  return perturbedTour;
-}
-*/
-
 //==== Action ===================================
 int ActionHelper::encodeSwap(pair<int,int> swap, int n){
   int a = swap.first;

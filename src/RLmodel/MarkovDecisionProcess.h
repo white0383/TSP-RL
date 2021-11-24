@@ -194,7 +194,24 @@ namespace ActionHelper{
 }
 
 namespace MDPHelper{
-  double getReward(Tour& pi_star, LinearFittedQIteration& LinQ);
+  /**
+   * Return reward function's value
+   * 
+   * let f(a,b) = | min (0, (a-b)/b )| = normalImproveReLu(a,b)
+   * let d_star is s_next.distPiStar
+   * let d_best is LinQ.bestDist
+   * let d_l is *(LinQ.bestDist.rbegin() + l - 1) 
+   *      (l is from 1 to |LinQ.bestDist| )
+   * let alpha is tspArgs.ALPHA
+   * 
+   * then reward is below
+   *  reward = f(d_star, d_best) 
+   *           + sum(l = 1 ~ |LinQ.bestDist|){
+   *              alpha^(l) * f(d_star, d_l)
+   *            }
+   */
+  double getReward(State& s_next, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  double normalImproveReLu(double a, double b);
 
   /**
    * Swap node p and q in pi
@@ -306,6 +323,7 @@ class State{
     // constructor 
     State(Tour pi, Tour pi_star); 
     State(Tour& pi, unsigned int time, const Arguments& tspArgs);
+    State(State& s_prev, Action& a_prev, unsigned int time, const Arguments& tspArgs);
 
     // getter 
     Tour getPi();
@@ -324,6 +342,9 @@ class Action{
     Action(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
     vector<pair <int, int> > getSwaps();
     int getSigma();
+
+    //For test
+    Action(vector<pair<int,int> > _swaps);
 };
 
 class MDP{
