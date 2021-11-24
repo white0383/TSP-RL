@@ -50,11 +50,10 @@ double MDPHelper::getReward(State& s_next, LinearFittedQIteration& LinQ, const A
   return rst_reward;
 }
 
-
 pair<double,double> MDPHelper::subPerturb(vector<int>& pi, vector<int>& pi_inv, const pair<int,int>& swap, const Arguments& tspArgs){
   int p_index = swap.first;
   int q_index = swap.second;
-  cout << "p : " << p_index << " q : " << q_index << endl;
+  //cout << "p : " << p_index << " q : " << q_index << endl;
 
   //Exception Check : when p >= q
   if(p_index >= q_index){
@@ -66,39 +65,9 @@ pair<double,double> MDPHelper::subPerturb(vector<int>& pi, vector<int>& pi_inv, 
   int i_order = pi_inv[p_index];
   int j_order = pi_inv[q_index];
   //if((i_order == 1)|| (j_order==1) || (i_order == tspArgs.V.getN()) || (j_order == tspArgs.V.getN())) 
-  cout << "i : " << i_order << " j : " << j_order << endl;
+  //cout << "i : " << i_order << " j : " << j_order << endl;
 
-  // Calculate addedDist, dropped Dist
-  ScaledNode i_minus_snode = tspArgs.V.getScaledNode(pi[i_order-1]);
-  ScaledNode i_snode = tspArgs.V.getScaledNode(pi[i_order]);
-  ScaledNode i_plus_snode = tspArgs.V.getScaledNode(pi[i_order+1]);
-  ScaledNode j_minus_snode = tspArgs.V.getScaledNode(pi[j_order-1]);
-  ScaledNode j_snode = tspArgs.V.getScaledNode(pi[j_order]);
-  ScaledNode j_plus_snode = tspArgs.V.getScaledNode(pi[j_order+1]);
-  cout << "pi : ";
-  for(auto foo : pi) cout << foo << " ";
-  cout << endl;
-  i_minus_snode.printScaledNode();
-  i_snode.printScaledNode();
-  i_plus_snode.printScaledNode();
-  j_minus_snode.printScaledNode();
-  j_snode.printScaledNode();
-  j_plus_snode.printScaledNode();
-
-  double droppedDist = 0;
-  droppedDist += dist(i_minus_snode,i_snode);
-  cout << " drop : " << i_minus_snode.index << ", " << i_snode.index;
-  cout << " dist : " << dist(i_minus_snode,i_snode) << endl;
-  droppedDist += dist(i_snode,i_plus_snode);
-  cout << " drop : " << i_snode.index << ", " << i_plus_snode.index;
-  cout << " dist : " << dist(i_snode,i_plus_snode) << endl;
-  droppedDist += dist(j_minus_snode,j_snode);
-  cout << " drop : " << j_minus_snode.index << ", " << j_snode.index;
-  cout << " dist : " << dist(j_minus_snode,j_snode) << endl;
-  droppedDist += dist(j_snode, j_plus_snode);
-  cout << " drop : " << j_snode.index << ", " << j_plus_snode.index;
-  cout << " dist : " << dist(j_snode,j_plus_snode) << endl;
-  cout << "total drop : " << droppedDist << endl;
+  pair<double,double> rstPair = MDPHelper::getAddedDroppedWeights(pi, pi_inv, swap, tspArgs);
 
   // Swap p_index and q_index in pi, pi_inv
   pi[i_order] = q_index;
@@ -106,117 +75,14 @@ pair<double,double> MDPHelper::subPerturb(vector<int>& pi, vector<int>& pi_inv, 
   pi_inv[q_index] = i_order;
   pi_inv[p_index] = j_order;
 
-  i_minus_snode = tspArgs.V.getScaledNode(pi[i_order-1]);
-  i_snode = tspArgs.V.getScaledNode(pi[i_order]);
-  i_plus_snode = tspArgs.V.getScaledNode(pi[i_order+1]);
-  j_minus_snode = tspArgs.V.getScaledNode(pi[j_order-1]);
-  j_snode = tspArgs.V.getScaledNode(pi[j_order]);
-  j_plus_snode = tspArgs.V.getScaledNode(pi[j_order+1]);
-  i_minus_snode.printScaledNode();
-  i_snode.printScaledNode();
-  i_plus_snode.printScaledNode();
-  j_minus_snode.printScaledNode();
-  j_snode.printScaledNode();
-  j_plus_snode.printScaledNode();
-
-  double addedDist = 0;
-  addedDist += dist(i_minus_snode,i_snode);
-  cout << " add  : " << i_minus_snode.index << ", " << i_snode.index;
-  cout << " dist : " << dist(i_minus_snode,i_snode) << endl;
-  addedDist += dist(i_snode,i_plus_snode);
-  cout << " add  : " << i_snode.index << ", " << i_plus_snode.index;
-  cout << " dist : " << dist(i_snode,i_plus_snode) << endl;
-  addedDist += dist(j_minus_snode,j_snode);
-  cout << " add  : " << j_minus_snode.index << ", " << j_snode.index;
-  cout << " dist : " << dist(j_minus_snode,j_snode) << endl;
-  addedDist += dist(j_snode, j_plus_snode);
-  cout << " add  : " << j_snode.index << ", " << j_plus_snode.index;
-  cout << " dist : " << dist(j_snode,j_plus_snode) << endl;
-  cout << "total add : " << droppedDist << endl;
-
-  pair<double,double> rstPair = make_pair(addedDist, droppedDist);
-  cout << "change : " << addedDist - droppedDist << endl;
+  // Exception handling
+  if(i_order == 1) pi.back() = q_index;
+  if(j_order == 1) pi.back() = p_index;
+  if(i_order == tspArgs.V.getN()) pi.front() = q_index;
+  if(j_order == tspArgs.V.getN()) pi.front() = p_index;
 
   return rstPair;
 }
-
-/* subPerturb save
-pair<double,double> MDPHelper::subPerturb(vector<int>& pi, vector<int>& pi_inv, const pair<int,int>& swap, const Arguments& tspArgs){
-  int p_index = swap.first;
-  int q_index = swap.second;
-  cout << "p : " << p_index << " q : " << q_index << endl;
-
-  //Exception Check : when p >= q
-  if(p_index >= q_index){
-    cout << "ERROR : MDPHelper::subPerturb input swap error" << endl;
-    cout << "p is greater than q. please check input argument" << endl;
-    exit(1);
-  }
-
-  int i_order = pi_inv[p_index];
-  int j_order = pi_inv[q_index];
-  //if((i_order == 1)|| (j_order==1) || (i_order == tspArgs.V.getN()) || (j_order == tspArgs.V.getN())) 
-  cout << "i : " << i_order << " j : " << j_order << endl;
-
-  // Calculate addedDist, dropped Dist
-  ScaledNode i_minus_snode = tspArgs.V.getScaledNode(pi[i_order-1]);
-  ScaledNode i_snode = tspArgs.V.getScaledNode(pi[i_order]);
-  ScaledNode i_plus_snode = tspArgs.V.getScaledNode(pi[i_order+1]);
-  ScaledNode j_minus_snode = tspArgs.V.getScaledNode(pi[j_order-1]);
-  ScaledNode j_snode = tspArgs.V.getScaledNode(pi[j_order]);
-  ScaledNode j_plus_snode = tspArgs.V.getScaledNode(pi[j_order+1]);
-  cout << "pi : ";
-  for(auto foo : pi) cout << foo << " ";
-  cout << endl;
-  i_minus_snode.printScaledNode();
-  i_snode.printScaledNode();
-  i_plus_snode.printScaledNode();
-  j_minus_snode.printScaledNode();
-  j_snode.printScaledNode();
-  j_plus_snode.printScaledNode();
-
-  double addedDist = 0;
-  addedDist += dist(i_minus_snode,j_snode);
-  cout << " add : " << i_minus_snode.index << ", " << j_snode.index;
-  cout << " dist : " << dist(i_minus_snode,j_snode) << endl;
-  addedDist += dist(j_snode,i_plus_snode);
-  cout << " add : " << j_snode.index << ", " << i_plus_snode.index;
-  cout << " dist : " << dist(j_snode,i_plus_snode) << endl;
-  addedDist += dist(j_minus_snode,i_snode);
-  cout << " add : " << j_minus_snode.index << ", " << i_snode.index;
-  cout << " dist : " << dist(j_minus_snode,i_snode) << endl;
-  addedDist += dist(i_snode, j_plus_snode);
-  cout << " add : " << i_snode.index << ", " << j_plus_snode.index;
-  cout << " dist : " << dist(i_snode,j_plus_snode) << endl;
-  cout << "total add : " << addedDist << endl;
-
-  double droppedDist = 0;
-  droppedDist += dist(i_minus_snode,i_snode);
-  cout << " drop : " << i_minus_snode.index << ", " << i_snode.index;
-  cout << " dist : " << dist(i_minus_snode,i_snode) << endl;
-  droppedDist += dist(i_snode,i_plus_snode);
-  cout << " drop : " << i_snode.index << ", " << i_plus_snode.index;
-  cout << " dist : " << dist(i_snode,i_plus_snode) << endl;
-  droppedDist += dist(j_minus_snode,j_snode);
-  cout << " drop : " << j_minus_snode.index << ", " << j_snode.index;
-  cout << " dist : " << dist(j_minus_snode,j_snode) << endl;
-  droppedDist += dist(j_snode, j_plus_snode);
-  cout << " drop : " << j_snode.index << ", " << j_plus_snode.index;
-  cout << " dist : " << dist(j_snode,j_plus_snode) << endl;
-  cout << "total drop : " << droppedDist << endl;
-
-  pair<double,double> rstPair = make_pair(addedDist, droppedDist);
-  cout << "change : " << addedDist - droppedDist << endl;
-
-  // Swap p_index and q_index in pi, pi_inv
-  pi[i_order] = q_index;
-  pi[j_order] = p_index;
-  pi_inv[q_index] = i_order;
-  pi_inv[p_index] = j_order;
-
-  return rstPair;
-}
-*/
 
 pair<double,double> MDPHelper::getAddedDroppedWeights(vector<int>& pi, vector<int>& pi_inv, const pair<int,int>& swap, const Arguments& tspArgs){
   int p_index = swap.first;
@@ -231,6 +97,25 @@ pair<double,double> MDPHelper::getAddedDroppedWeights(vector<int>& pi, vector<in
 
   int i_order = pi_inv[p_index];
   int j_order = pi_inv[q_index];
+  int N = tspArgs.V.getN();
+
+  bool pqAreAdj = false;
+
+  if((abs(i_order -j_order) == 1) || ((i_order == 1) && (j_order == N) )|| ((i_order == N) && (j_order == 1) )){
+    pqAreAdj = true;
+    if(((j_order < i_order) && ((i_order != N) || (j_order != 1)))
+        || ((i_order == 1) && (j_order == N) )){
+      int tmpCopy = 0;
+
+      tmpCopy = p_index;
+      p_index = q_index;
+      q_index = tmpCopy;
+
+      tmpCopy = i_order;
+      i_order = j_order;
+      j_order = tmpCopy;      
+    }
+  }
 
   // Calculate addedDist, dropped Dist
   ScaledNode i_minus_snode = tspArgs.V.getScaledNode(pi[i_order-1]);
@@ -239,21 +124,49 @@ pair<double,double> MDPHelper::getAddedDroppedWeights(vector<int>& pi, vector<in
   ScaledNode j_minus_snode = tspArgs.V.getScaledNode(pi[j_order-1]);
   ScaledNode j_snode = tspArgs.V.getScaledNode(pi[j_order]);
   ScaledNode j_plus_snode = tspArgs.V.getScaledNode(pi[j_order+1]);
+  //cout << "pi : ";
+  //for(auto foo : pi) cout << foo << " ";
+  //cout << endl;
+  //i_minus_snode.printScaledNode();
+  //i_snode.printScaledNode();
+  //i_plus_snode.printScaledNode();
+  //j_minus_snode.printScaledNode();
+  //j_snode.printScaledNode();
+  //j_plus_snode.printScaledNode();
 
   double addedDist = 0;
   addedDist += dist(i_minus_snode,j_snode);
-  addedDist += dist(j_snode,i_plus_snode);
-  addedDist += dist(j_minus_snode,i_snode);
+  //cout << " add : " << i_minus_snode.index << ", " << j_snode.index;
+  //cout << " dist : " << dist(i_minus_snode,j_snode) << endl;
+  if(pqAreAdj == false) addedDist += dist(j_snode,i_plus_snode);
+  //cout << " add : " << j_snode.index << ", " << i_plus_snode.index;
+  //cout << " dist : " << dist(j_snode,i_plus_snode) << endl;
+  if(pqAreAdj == false) addedDist += dist(j_minus_snode,i_snode);
+  //cout << " add : " << j_minus_snode.index << ", " << i_snode.index;
+  //cout << " dist : " << dist(j_minus_snode,i_snode) << endl;
   addedDist += dist(i_snode, j_plus_snode);
+  //cout << " add : " << i_snode.index << ", " << j_plus_snode.index;
+  //cout << " dist : " << dist(i_snode,j_plus_snode) << endl;
+  //cout << "total add : " << addedDist << endl;
 
   double droppedDist = 0;
   droppedDist += dist(i_minus_snode,i_snode);
-  droppedDist += dist(i_snode,i_plus_snode);
-  droppedDist += dist(j_minus_snode,j_snode);
+  //cout << " drop : " << i_minus_snode.index << ", " << i_snode.index;
+  //cout << " dist : " << dist(i_minus_snode,i_snode) << endl;
+  if(pqAreAdj == false) droppedDist += dist(i_snode,i_plus_snode);
+  //cout << " drop : " << i_snode.index << ", " << i_plus_snode.index;
+  //cout << " dist : " << dist(i_snode,i_plus_snode) << endl;
+  if(pqAreAdj == false) droppedDist += dist(j_minus_snode,j_snode);
+  //cout << " drop : " << j_minus_snode.index << ", " << j_snode.index;
+  //cout << " dist : " << dist(j_minus_snode,j_snode) << endl;
   droppedDist += dist(j_snode, j_plus_snode);
+  //cout << " drop : " << j_snode.index << ", " << j_plus_snode.index;
+  //cout << " dist : " << dist(j_snode,j_plus_snode) << endl;
+  //cout << "total drop : " << droppedDist << endl;
 
   pair<double,double> rstPair = make_pair(addedDist, droppedDist);
-  //NO SWAP !!!!
+  //cout << "change : " << addedDist - droppedDist << endl;
+
   return rstPair; 
 }
 
@@ -278,7 +191,7 @@ vector<double> MDPHelper::getActionFeatures(const vector<pair<int,int> >& swaps,
   vector<int> pi_inv_vec;
   StateHelper::initPiAndPiInv(pi_star,pi_vec,pi_inv_vec);
   for(auto swap : swaps){
-    addDropWeightsInfo = MDPHelper::subPerturb(pi_vec, pi_inv_vec, swap, tspArgs);
+    addDropWeightsInfo = MDPHelper::getAddedDroppedWeights(pi_vec, pi_inv_vec, swap, tspArgs);
     addedWeights += addDropWeightsInfo.first;
     droppedWeights += addDropWeightsInfo.second;
   }
@@ -418,17 +331,16 @@ Tour State::perturb(Action& a, const Arguments& tspArgs){
     vari_scost += addDropWeightsInfo.first;
     vari_scost -= addDropWeightsInfo.second;
   }
-  cout << "pi2 : ";
-  for(auto foo : pi_star_vec)cout << foo << " ";
-  cout << endl;
-  cout << "total change : " << vari_scost<<endl;
+  //cout << "pi2 : ";
+  //for(auto foo : pi_star_vec)cout << foo << " ";
+  //cout << endl;
+  //cout << "total change : " << vari_scost<<endl;
 
   //Then, pi_star_vec represent perturbed new Tour
   StateHelper::eraseDummiesInPiVec(pi_star_vec);
   Tour rst_pi(pi_star_vec,tspArgs.V);
   double rst_pi_scost = this->pi_star.getScaledCost() + vari_scost;
   rst_pi.setScaledCost(rst_pi_scost);
-  //rst_pi.setScaledCost(tspArgs.V);
 
   return rst_pi;
 };
@@ -547,7 +459,7 @@ vector<pair<int,int> > ActionHelper::genFullGreedy(Tour& pi_star, LinearFittedQI
   int n = tspArgs.V.getN();
   const int codeMax = (n*n -n) / 2; // Maximum swapCode
   int sigma = 0;
-  const int sigmaMax = (int)(ceil(n/10.0));
+  const int sigmaMax = tspArgs.SIGMAMAX;
   int bestCode = 0; // code which achived best score in while loop
   double tmp_score = 0;
   double bestScore = -(DBL_MAX); // the largest <f_act|w_act> until now
@@ -600,7 +512,7 @@ vector<pair<int,int> > ActionHelper::genPartGreedy(Tour& pi_star, LinearFittedQI
   int n = tspArgs.V.getN();
   const int codeMax = (n*n -n) / 2; // Maximum swapCode
   int sigma = 0;
-  const int sigmaMax = (int)(ceil(n/10.0));
+  const int sigmaMax = tspArgs.SIGMAMAX;
   int bestCode = 0; // code which achived best score in while loop
   double tmp_score = 0;
   double bestScore = -(DBL_MAX); // the largest <f_act|w_act> until now
@@ -649,7 +561,7 @@ vector<pair<int,int> > ActionHelper::genSampleGreedy(Tour& pi_star, LinearFitted
   int n = tspArgs.V.getN();
   const int codeMax = (n*n -n) / 2; // Maximum swapCode
   int sigma = 1;
-  const int sigmaMax = (int)(ceil(n/10.0));
+  const int sigmaMax = tspArgs.SIGMAMAX;
   double tmp_score = 0;
   double bestScore = -(DBL_MAX); // the largest <f_act|w_act> until now
   vector<pair<int,int> > rst_swaps; // empty now
@@ -699,7 +611,7 @@ vector<pair<int,int> > ActionHelper::genRandom(const Arguments& tspArgs){
   int n=tspArgs.V.getN();
   const int codeMax = (n*n-n)/2;
 
-  const int sigmaMax = (int)(ceil(n/2.0));
+  const int sigmaMax = tspArgs.SIGMAMAX;
   const int sigma = (genrand_int31() % sigmaMax) + 1;
 
   vector<int> rand_codes = genRandDiffIntVecBySet(codeMax,sigma);
