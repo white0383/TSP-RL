@@ -338,10 +338,7 @@ vector<double> MDPHelper::calcF3KSMPjs(State& s, LinearFittedQIteration& LinQ, c
 
 vector<double> MDPHelper::getFeatureVector(State& s, Action& a, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   vector<double> rst_featureVector;
-  rst_featureVector.reserve(tspArgs.K + 1);
-
-  //f_0
-  rst_featureVector.emplace_back(1.0);
+  rst_featureVector.reserve(tspArgs.K);
 
   //state features
   vector<double> stateFeatures = MDPHelper::getStateFeatures(s,LinQ,tspArgs);
@@ -354,8 +351,6 @@ vector<double> MDPHelper::getFeatureVector(State& s, Action& a, LinearFittedQIte
   //DEBUG
   return rst_featureVector;
 }
-
-
 
 double MDPHelper::evaluateActionFeatures(vector<double> actionFeatures, LinearFittedQIteration& LinQ,const Arguments& tspArgs){
   double rst_actionFeature_value = 0.0;
@@ -373,41 +368,14 @@ double MDPHelper::evaluateActionFeatures(vector<double> actionFeatures, LinearFi
   return rst_actionFeature_value;
 }
 
-double MDPHelper::evaluateStateFeatures(vector<double> stateFeatures, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
-  double rst_stateFeature_value = 0.0;
+double MDPHelper::Qfunction(State& s, Action& a,LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  double rst_qvalue=LinQ.weights.at(0); // w_0
 
-  auto ite_stateWeights_begin =
-    LinQ.weights.begin() +
-    1;
-  auto ite_stateWeights_end = 
-    LinQ.weights.begin() +
-    1 +
-    3 +
-    tspArgs.KSMP +
-    tspArgs.OMEGA;
-  
-  int sfIndex = 0;
-  for(auto ite_ws = ite_stateWeights_begin; ite_ws != ite_stateWeights_end; ++ite_ws) rst_stateFeature_value += stateFeatures[sfIndex++] * (*ite_ws); 
+  vector<double> featureVector = MDPHelper::getFeatureVector(s,a,LinQ,tspArgs);
+  for(int i = 0; i<featureVector.size() ; i++){
+    rst_qvalue += featureVector.at(i) * LinQ.weights.at(i+1); //sum of f_i * w_i (i = 1 ~ K)
+  }
 
-  return rst_stateFeature_value; 
-}
-
-double MDPHelper::Qfunction(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
-  double rst_qvalue=0.0;
-
-  //get w_0
-  double w_0 = LinQ.weights[0];
-
-  //calculate q_s
-  //vector<double> stateFeatures = MDPHelper::getStateFeatures(??);
-  //double qvalue_s = MDPHelper::evaluateStateFeatures(stateFeatures, LinQ, tspArgs);
-
-  //calculate q_a
-  vector<double> actionFeatures = MDPHelper::getActionFeatures(a,s,LinQ,tspArgs);
-  double qvalue_a = MDPHelper::evaluateActionFeatures(actionFeatures,LinQ,tspArgs);
-
-  //sum them and return
-  rst_qvalue = w_0 + qvalue_a; //+qvalue_s
   return rst_qvalue;
 }
 //==== State ====================================
@@ -444,7 +412,6 @@ State::State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const 
     cout << "update " << s_prev.time << " : ";
     this->bestTime = s_prev.time;
   } else {
-    cout << "noupda ";
     this->bestTime = LinQ.bestTime;
   };
   cout << "time : " << s_prev.time << " BestTime : " << this->bestTime << endl;
@@ -807,14 +774,6 @@ int Action::getSigma(){
 
 //==== MDP ===+==================================
 MDP::MDP(State& s_prev, State& s_next, Action& a_prev, double r_prev, vector<double>& f_prev, LinearFittedQIteration& LinQ){
-  //unsigned int time;
-  //unsigned int epi;
-  //unsigned int step;
-  //State s_prev;
-  //State s_next;
-  //Action a_prev;
-  //double r_prev;
-  //vector<double> f_prev;
   this->time = LinQ.time;
   this->epi = LinQ.epi;
   this->step = LinQ.step;

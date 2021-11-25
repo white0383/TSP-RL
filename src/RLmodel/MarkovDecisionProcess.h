@@ -341,9 +341,9 @@ namespace MDPHelper{
    * Q_1 is evaluateStateFeatures
    * Q_2 is evaluateActionFeatures
    */
-  double Qfunction(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  //h = Q(replayBuffer.at(sampleIndex).s_next, a, LinQ.weights);
+  double Qfunction(State& s, Action& a, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
   double evaluateActionFeatures(vector<double> actionFeatures, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
-  double evaluateStateFeatures(vector<double> stateFeatures, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 }
 
 class State{

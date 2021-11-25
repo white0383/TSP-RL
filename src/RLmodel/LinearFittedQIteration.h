@@ -44,6 +44,9 @@ class LinearFittedQIteration{
     deque<double> distQueue; // maximum length is THETA in tspArgs
     vector<int> V_smp;
 
+    //For showing performance
+    Tour bestTour;
+
   public:
     LinearFittedQIteration(const Arguments& tspArgs);
 
@@ -98,7 +101,7 @@ class LinearFittedQIteration{
      * then bestDist = dist_prev 
      * and bestTime = time
      */
-    void updateBestInfos(double dist_piStar_prev);
+    void updateBestInfos(State& s_prev);
 
     /**
      * let input double number as dist_next
@@ -111,7 +114,7 @@ class LinearFittedQIteration{
     /**
      * update weights vector using least square method
      */
-    void updateWeights(const DataSet& dataSet, const Arguments& tspArgs);
+    void updateWeights(DataSet& dataSet);
 
     // Getter
     vector<double> getWeights();
@@ -141,7 +144,8 @@ class DataSet{
     vector< vector<double> > featureVectors; // model's input data
 
   public:
-    DataSet(const Arguments& tspArgs, deque<MDP>& replayBuffer, const vector<double> weights);
+    DataSet() = default;
+    DataSet(const Arguments& tspArgs, LinearFittedQIteration& LinQ);
 };
 
 

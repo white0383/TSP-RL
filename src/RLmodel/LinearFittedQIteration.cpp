@@ -3,6 +3,7 @@
 #include "../model/Arguments.h"
 #include "../solver/initial_solution/GenerateInitialSolution.h"
 #include "../helper/RandVec.h"
+#include "../helper/fitLinearQ.h"
 
 #include <ctime>
 #include <vector>
@@ -121,6 +122,7 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
   pi_init.setScaledCost(tspArgs.V);
   State s_prev = State(pi_init,tspArgs);
   this->distQueue.push_back(s_prev.distPiStar);
+  this->bestTour = s_prev.pi_star;
 
   //bool testOK = true;
   //int failCount = 0;
@@ -129,7 +131,6 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
     for(this->step = 1;this->step <= this->MAXstep;this->step++){
       cout << "#####time : " << this->time << " begin " << endl;
       Action a_prev = Action(s_prev, *this, tspArgs);
-      //cout << "sigma : " << a_prev.getSigma() << endl;
       State s_next = State(s_prev, a_prev, *this,tspArgs);
 
       /* perturb test
@@ -187,7 +188,7 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
       MDP mdp_prev = MDP(s_prev, s_next, a_prev, r_prev, f_prev, *this);
       this->updateInfo(mdp_prev, s_prev, s_next, tspArgs);
     }
-    //DataSet dataset = DataSet(this->weights, this->replayBuffer, tspArgs)
+    DataSet dataset = DataSet(tspArgs, *this);
     //this->updateWeights(dataset);
     this->epi++;
   }
@@ -224,7 +225,7 @@ void LinearFittedQIteration::updateInfo(MDP& mdp, State& s_prev, State& s_next, 
   this->updateLastTimeNodeActioned(mdp.a_prev);
 
   // update bestTime, bestDist
-  this->updateBestInfos(s_prev.distPiStar);
+  this->updateBestInfos(s_prev);
 
   // update distQueue
   //updateDistQueue(double dist_piStar_next, const Arguments& tstArgs){
@@ -251,10 +252,13 @@ void LinearFittedQIteration::updateLastTimeNodeActioned(Action& a_prev){
   }
 }
 
-void LinearFittedQIteration::updateBestInfos(double dist_piStar_prev){
+void LinearFittedQIteration::updateBestInfos(State& s_prev){
+  double dist_piStar_prev = s_prev.distPiStar;
+
   if(dist_piStar_prev < this->bestDist){
     this->bestDist = dist_piStar_prev;
     this->bestTime = this->time;
+    this->bestTour = s_prev.pi_star;
   }
 }
 
@@ -265,4 +269,30 @@ void LinearFittedQIteration::updateDistQueue(double dist_piStar_next, const Argu
   }
 }
 
+void LinearFittedQIteration::updateWeights(DataSet& dataSet){
+  this->weights = fitLinearQ(dataSet.featureVectors, dataSet.targetValues);
+}
+
+
 //========= DataSet Member ===========================================
+DataSet::DataSet(const Arguments& tspArgs, LinearFittedQIteration& LinQ){
+  deque<MDP>& replayBuffer = LinQ.replayBuffer;
+
+  this->sampleIndexs = genRandDiffIntVecBySet(0, replayBuffer.size()-1, tspArgs.T);
+  this->targetValues.reserve(tspArgs.T);
+  this->featureVectors.reserve(tspArgs.T);
+
+  double h = 0.0;
+  double targetValue = 0.0;
+
+  for(int sampleIndex : sampleIndexs){
+    Action a_sampled = Action(replayBuffer.at(sampleIndex).s_next, LinQ, tspArgs);
+    h = MDPHelper::Qfunction(replayBuffer.at(sampleIndex).s_next, a_sampled, LinQ, tspArgs);
+
+    targetValue = replayBuffer.at(sampleIndex).r_prev + tspArgs.GAMMA * h;
+    vector<double> f_sampled = replayBuffer.at(sampleIndex).f_prev;
+
+    this->targetValues.emplace_back(targetValue);
+    this->featureVectors.emplace_back(f_sampled);
+  }
+}
