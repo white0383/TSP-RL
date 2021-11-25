@@ -2,6 +2,7 @@
 #include "../helper/mt19937ar.h"
 #include "../model/Arguments.h"
 #include "../solver/initial_solution/GenerateInitialSolution.h"
+#include "../helper/RandVec.h"
 
 #include <ctime>
 #include <vector>
@@ -64,8 +65,8 @@ namespace LinQHelper {
     return rst_dummy;   
   }; 
 
-  vector<MDP> genInitReplayBuffer(){
-    vector<MDP> rstDeq;
+  deque<MDP> genInitReplayBuffer(){
+    deque<MDP> rstDeq;
     return rstDeq;
   }
 
@@ -79,6 +80,11 @@ namespace LinQHelper {
     // rstDeq = {+infinity} = {dist(pi_star_0)}
     rstDeq.push_back(DBL_MAX); 
     return rstDeq;
+  }
+
+  vector<int> genVsmp(const Arguments& tspArgs){
+    vector<int> rstVec = genRandDiffIntVecBySet(tspArgs.V.getN(), tspArgs.KSMP);
+    return rstVec;
   }
 
 //===================== in LinQ.Learn ==================================
@@ -106,6 +112,7 @@ LinearFittedQIteration::LinearFittedQIteration(const Arguments& tspArgs){
 
   this->lastTimeNodeActioned = LinQHelper::genInitLastTimeNodeActioned(tspArgs);
   this->distQueue = LinQHelper::genInitDistQueue(tspArgs);
+  this->V_smp = LinQHelper::genVsmp(tspArgs);
 };
 
 void LinearFittedQIteration::learn(const Arguments& tspArgs){
@@ -160,17 +167,25 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
       }
       */
       
-      s_prev = s_next;
       double r_prev = MDPHelper::getReward(s_next,*this,tspArgs);
 
-      //vector<double> f_prev = MDPHelper::getFeatureVector(s_prev, a_prev, *this);
-      //MDP mdp_prev = MDP(s_prev, a_prev, r_prev, s_next, f_prev, *this);
-      //this->updateModelInfo(mdp_prev, tspArgs, s_prev, s_next)
-      
-      //FOR DEBUG
-      //cout << "#####time : " << this->time << " finish " << endl << endl;
-      this->time++;
-      this->distQueue.push_back(s_prev.distPiStar);
+      /* State Feature test
+      vector<double> f_s = MDPHelper::getStateFeatures(s_prev,*this,tspArgs);
+      cout << "STATE features" << endl;
+      s_prev.pi_star.printTour();
+      cout << "dimention : " << f_s.size() << endl;
+      cout << "f1 : " << f_s.at(0) << " f2 : " << f_s.at(1) << " f3 : " << f_s.at(2) << endl;
+      cout << "f3i : " ;
+      for(int ii = 0; ii < tspArgs.KSMP ; ii++) cout << f_s.at(3+ii) << " ";
+      cout << endl;
+      cout << "f3KSMPj : ";
+      for(int ii = 0; ii < tspArgs.OMEGA ; ii++) cout << f_s.at(3+tspArgs.KSMP+ii) << " ";
+      cout << endl;
+      */
+
+      vector<double> f_prev = MDPHelper::getFeatureVector(s_prev, a_prev, *this, tspArgs);
+      MDP mdp_prev = MDP(s_prev, s_next, a_prev, r_prev, f_prev, *this);
+      this->updateInfo(mdp_prev, s_prev, s_next, tspArgs);
     }
     //DataSet dataset = DataSet(this->weights, this->replayBuffer, tspArgs)
     //this->updateWeights(dataset);
@@ -186,18 +201,68 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
 
 }
 
-  bool LinearFittedQIteration::checkTerminationCondition(const Arguments& tspArgs){
-    if(tspArgs.TERMINATE_METHOD == "EPI"){
-      return (this->epi > this->MAXepi);
-    }else if(tspArgs.TERMINATE_METHOD == "SEC"){
-      return (this->spendSec > this->MAXspendSec);
-    }
-
-    // statements below are just for c++ grammar
-    // Only when Acguments' initialization has problem, 
-    // below statement will run.
-    cout << "Error : ReinLearnMemory::checkTerminationCondition invalid termination condition " << endl;
-    cout << "Your input TERMINATE_METHOD is \"" << tspArgs.TERMINATE_METHOD <<"\""<< endl;
-    exit(1);    
+bool LinearFittedQIteration::checkTerminationCondition(const Arguments& tspArgs){
+  if(tspArgs.TERMINATE_METHOD == "EPI"){
+    return (this->epi > this->MAXepi);
+  }else if(tspArgs.TERMINATE_METHOD == "SEC"){
+    return (this->spendSec > this->MAXspendSec);
   }
+
+  // statements below are just for c++ grammar
+  // Only when Acguments' initialization has problem, 
+  // below statement will run.
+  cout << "Error : ReinLearnMemory::checkTerminationCondition invalid termination condition " << endl;
+  cout << "Your input TERMINATE_METHOD is \"" << tspArgs.TERMINATE_METHOD <<"\""<< endl;
+  exit(1);    
+}
+
+void LinearFittedQIteration::updateInfo(MDP& mdp, State& s_prev, State& s_next, const Arguments& tspArgs){
+  // update replayBuffer
+  this->updateReplayBuffer(mdp, tspArgs);
+
+  // update lastTimeNodeActioned
+  this->updateLastTimeNodeActioned(mdp.a_prev);
+
+  // update bestTime, bestDist
+  this->updateBestInfos(s_prev.distPiStar);
+
+  // update distQueue
+  //updateDistQueue(double dist_piStar_next, const Arguments& tstArgs){
+  this->updateDistQueue(s_next.distPiStar, tspArgs);
+
+  // s_next is next s_prev
+  s_prev = s_next;
+
+  // time inscrease
+  this->time++;
+}
+
+void LinearFittedQIteration::updateReplayBuffer(MDP& prevMDP,const Arguments& tspArgs){
+  this->replayBuffer.push_back(prevMDP);
+  if(this->replayBuffer.size() > tspArgs.MMAX){
+    this->replayBuffer.pop_front();
+  }
+}
+
+void LinearFittedQIteration::updateLastTimeNodeActioned(Action& a_prev){
+  for(pair<int,int> swap : a_prev.getSwaps()){
+    this->lastTimeNodeActioned.at(swap.first) = this->time;
+    this->lastTimeNodeActioned.at(swap.second) = this->time;
+  }
+}
+
+void LinearFittedQIteration::updateBestInfos(double dist_piStar_prev){
+  if(dist_piStar_prev < this->bestDist){
+    this->bestDist = dist_piStar_prev;
+    this->bestTime = this->time;
+  }
+}
+
+void LinearFittedQIteration::updateDistQueue(double dist_piStar_next, const Arguments& tspArgs){
+  this->distQueue.push_back(dist_piStar_next);
+  if(this->distQueue.size() > tspArgs.THETA){
+    this->distQueue.pop_front();
+  }
+}
+
 //========= DataSet Member ===========================================

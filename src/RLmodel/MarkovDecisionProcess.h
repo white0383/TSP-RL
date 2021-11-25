@@ -52,6 +52,9 @@ namespace StateHelper{
    */
   void initPiAndPiInv(Tour& pi_tour, vector<int>& pi_vec, vector<int>& pi_inv_vec);
 
+  //do the same thing with initPiAndPiInv, but pi_inv only
+  void initPiInv(Tour& pi_tour, vector<int>& pi_inv_vec);
+
   void eraseDummiesInPiVec(vector<int>& pi_vec);
 }
 
@@ -278,19 +281,38 @@ namespace MDPHelper{
   vector<double> getActionFeatures(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
   vector<double> getActionFeatures(const vector<pair<int,int> >& swaps, Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
-  //vector<double> getStateFeatures(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  /**
+   * Return state feature
+   * 
+   * f_1 ~ f_(3 + KSMP + OMEGA) -> state features
+   * f_1 = s.distPiStar
+   * f_2 = s.time - s.bestTime
+   * f_3 = (s.distPiStar < s.distPiPastStar)
+   * f_3+i ( i = 1 ~ KSMP)
+   *     = MDPHelper::calcF3i
+   * f_3+KSMP+j (j = 1 ~ OMEGA )
+   *     = (j-1)th element in MDPHelper::calcF3js
+   */
+  vector<double> getStateFeatures(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  vector<double> calcF3is(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
+  vector<double> calcF3KSMPjs(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
   /**
    * return f(s,a) = K+1 dimentional double vector
    * 
-   * let f_i = f(s,a) [i] (i = 0 ~ K)
+   * let f_i = f(s,a).at(i) (i = 0 ~ K)
+   * let V_SMP = {c_i} (i = 1 ~ KSMP)
+   *      c_i is a random city's index which is saved in LinQ
+   *      they are all different
    * 
    * f_0 = 1 -> represent constance in weight vector
    * f_1 ~ f_(3 + KSMP + OMEGA) -> state features
-   *    f_1 = s.distPiStar
-   *    f_2 = s.time - LinQ.bestTime
+   * f_(3 + KSMP + OMEGA) + 1 ~ f_(3 + KSMP + OMEGA) + 6 -> action features
+   * 
+   * calculate state, action features saperately
+   * and merge them later
    */
-  //vector<double> getFeatureVector(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs)
+  vector<double> getFeatureVector(State& s, Action& a, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
   /**
    * Qfunction( action value function) is a mapping 
@@ -360,6 +382,7 @@ class State{
   
   public:
     // constructor 
+    State() = default;
     State(Tour pi, Tour pi_star); 
     State(Tour& pi, const Arguments& tspArgs);
     State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
@@ -378,6 +401,7 @@ class Action{
     vector<pair <int, int> > swaps; // pairs of swapped indexes
 
   public:
+    Action() = default;
     Action(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
     vector<pair <int, int> > getSwaps();
     int getSigma();
@@ -387,11 +411,18 @@ class Action{
 };
 
 class MDP{
-  private:
+  public:
     unsigned int time;
-    State state;
-    Action action;
-    double reward;
+    unsigned int epi;
+    unsigned int step;
+    State s_prev;
+    State s_next;
+    Action a_prev;
+    double r_prev;
+    vector<double> f_prev;
+  
+  public:
+    MDP(State& s_prev, State& s_next, Action& a_prev, double r_prev, vector<double>& f_prev, LinearFittedQIteration& LinQ);
 };
 
 #endif // TSP_TMPMDP_H

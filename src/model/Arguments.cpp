@@ -1,7 +1,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <algorithm> // std::find
+#include <algorithm> // std::find std::min
+#include <cmath> // floor, log
 #include "./Arguments.h"
 #include "../model/Graph.h"
 #include "../helper/FileIOHelper.h"
@@ -217,6 +218,7 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
     this->K = 3+ this->KSMP + this->OMEGA + 6;
     this->ASMP = min(this->V.getN(),100);
     this->SIGMAMAX = min(this->V.getN()/10, 100);
+    this->F3IMAX = floor(log(this->V.getN()) / log(2));
 
   } else {
     cout << "Unexpected exception Occured in Arguments constructor" << endl;

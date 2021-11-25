@@ -22,6 +22,7 @@ int main(int argc, char** argv){
   //Define LinQ model
   LinearFittedQIteration* tmpLinQModel = new LinearFittedQIteration(tmpArgs);
 
+
   //Learn Q-function
   time_t startT = clock();
   tmpLinQModel->learn(tmpArgs);
@@ -58,8 +59,6 @@ int main(int argc, char** argv){
   cout << "PART : " << partSec << " sec" << endl;
   cout << "FULL : " << fullSec << " sec" << endl;
   cout << "SAMP : " << sampSec << " sec" << endl;
-
-
 
   return 0;
 }

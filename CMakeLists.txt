@@ -14,6 +14,7 @@ add_executable(tsp
   ./src/RLmodel/MarkovDecisionProcess.cpp
   ./src/helper/FileIOHelper.cpp
   ./src/helper/mt19937ar.cpp
+  ./src/helper/RandVec.cpp
   ./src/solver/initial_solution/GenerateInitialSolution.cpp
   ./src/solver/initial_solution/method/RandomTour.cpp
   ./src/solver/initial_solution/method/NearestNeighbor.cpp

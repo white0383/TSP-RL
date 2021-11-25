@@ -4,15 +4,15 @@
 #include "../model/Tour.h"
 #include "../model/Graph.h"
 #include "../model/Distance.h"
-#include "../helper/RandVec.hpp"
 #include "../solver/local_search/SearchLocalOpt.h"
 #include "../helper/mt19937ar.h" // DEBUG
+#include "../helper/RandVec.h"
 
 #include <vector>
 #include <iostream> // std::cout
 #include <utility> // std::pair
 #include <set>
-#include <algorithm> // std::min, std::max
+#include <algorithm> // std::min, std::max std::sort std::greater<double>()
 #include <limits.h> // INT_MAX, INT_MIN, UINT_MAX
 #include <cmath> // floor, sqrt
 #include <float.h> // DBL_MAX, DBL_MIN
@@ -232,6 +232,131 @@ vector<double> MDPHelper::getActionFeatures(const vector<pair<int,int> >& swaps,
   return actionFeatures;
 }
 
+vector<double> MDPHelper::getStateFeatures(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  vector<double> stateFeatures;
+  int KSMP = tspArgs.KSMP;
+  int OMEGA = tspArgs.OMEGA;
+
+  stateFeatures.reserve(3+KSMP+OMEGA);
+
+  // calculate f1
+  double f1 = s.distPiStar;
+  stateFeatures.emplace_back(f1);
+
+  // calculate f2
+  double f2 = s.time - s.bestTime;
+  stateFeatures.emplace_back(f2);
+
+  // calculate f3
+  double f3 = (s.distPiStar < s.distPiPastStar) ? 1.0 : 0.0;
+  stateFeatures.emplace_back(f3);
+
+  // calculate f(3+1) ~ f(3+KSMP)
+  vector<double> f3is_vec = MDPHelper::calcF3is(s,LinQ,tspArgs);
+  for(double f3i : f3is_vec) stateFeatures.emplace_back(f3i);
+
+  // calculate f(3+KSMP+1) ~ f(3+KSMP+OMEGA) 
+  vector<double> f3KSMPjs_vec = MDPHelper::calcF3KSMPjs(s,LinQ,tspArgs);
+  for(double f3KSMPj : f3KSMPjs_vec) stateFeatures.emplace_back(f3KSMPj);
+
+  return stateFeatures;
+}
+
+vector<double> MDPHelper::calcF3is(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  vector<double> rst_vec;
+  rst_vec.reserve(tspArgs.KSMP);
+
+  Tour& piStar = s.pi_star;
+  const Graph& g = tspArgs.V;
+  vector<int>& V_smp = LinQ.V_smp;
+  // the number of top tspArgs.F3IMAX shortest edges incident to c_i (index of node)
+  // which are included in piStar
+  double countEdge = 0;
+  int kthToCi = 0;
+
+  int c_i = 0;
+  int j_order = 0;
+  int c_i_minus = 0;
+  int c_i_plus = 0;
+
+  vector<int> pi_inv_vec;
+  StateHelper::initPiInv(piStar,pi_inv_vec);
+  for(int i =1; i<tspArgs.KSMP+1;i++){
+    countEdge = 0.0;
+    c_i = V_smp[i-1];
+    j_order = pi_inv_vec.at(c_i);
+
+    c_i_minus = piStar.pi(j_order - 1);
+    c_i_plus = piStar.pi(j_order + 1);
+
+    for(int k = 1; k < tspArgs.F3IMAX+1; k++){
+      kthToCi = g.distOrder[c_i][k].first;
+      if(c_i_minus == kthToCi) {
+        countEdge += 1.0;
+      } else if(c_i_plus == kthToCi){
+        countEdge += 1.0;
+      }
+
+      if(countEdge == 2.0) break;
+    }
+
+    rst_vec.emplace_back(countEdge);
+  }
+
+  return rst_vec;
+}
+
+vector<double> MDPHelper::calcF3KSMPjs(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  vector<double> rst_vec;
+  rst_vec.reserve(tspArgs.OMEGA);
+  vector<double> adjEdgesDist_vec;
+  adjEdgesDist_vec.reserve(tspArgs.V.getN());
+
+  Tour& piStar = s.pi_star;
+  const Graph& g = tspArgs.V;
+
+  double dist_front = dist(g.getScaledNode(piStar.pi(0)), g.getScaledNode(piStar.pi(1)));
+  double dist_back = 0.0;
+
+  for(int i = 1; i < tspArgs.V.getN()+1;i++){
+    dist_back = dist(g.getScaledNode(piStar.pi(i)), g.getScaledNode(piStar.pi(i+1)));
+    adjEdgesDist_vec.emplace_back(dist_front + dist_back);
+
+    //dist_front(i+1) = dist_back(i)
+    dist_front = dist_back;
+  }
+
+  //sort adjEdgesDist_vec in descending order
+  sort(adjEdgesDist_vec.begin(),adjEdgesDist_vec.end(),greater<double>());
+
+  for(int i = 0; i < tspArgs.OMEGA ; i++){
+    rst_vec.emplace_back(adjEdgesDist_vec[i]);
+  }
+
+  return rst_vec;
+}
+
+vector<double> MDPHelper::getFeatureVector(State& s, Action& a, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
+  vector<double> rst_featureVector;
+  rst_featureVector.reserve(tspArgs.K + 1);
+
+  //f_0
+  rst_featureVector.emplace_back(1.0);
+
+  //state features
+  vector<double> stateFeatures = MDPHelper::getStateFeatures(s,LinQ,tspArgs);
+  for(double stateFeature : stateFeatures) rst_featureVector.emplace_back(stateFeature);
+
+  //action features
+  vector<double> actionFeatures = MDPHelper::getActionFeatures(a,s,LinQ,tspArgs);
+  for(double actionFeature : actionFeatures) rst_featureVector.emplace_back(actionFeature);
+
+  //DEBUG
+  return rst_featureVector;
+}
+
+
+
 double MDPHelper::evaluateActionFeatures(vector<double> actionFeatures, LinearFittedQIteration& LinQ,const Arguments& tspArgs){
   double rst_actionFeature_value = 0.0;
 
@@ -316,15 +441,13 @@ State::State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const 
 
   this->distPiPastStar = s_prev.distPiStar;
   if(s_prev.distPiStar < LinQ.bestDist){
-    //TMP
-    LinQ.bestDist = s_prev.distPiStar;
-    LinQ.bestTime = s_prev.time;
-    //TMP
+    cout << "update " << s_prev.time << " : ";
     this->bestTime = s_prev.time;
   } else {
+    cout << "noupda ";
     this->bestTime = LinQ.bestTime;
   };
-  cout << "time : " << this->time << " BestTime : " << this->bestTime << endl;
+  cout << "time : " << s_prev.time << " BestTime : " << this->bestTime << endl;
 }
 
 Tour State::getPi(){
@@ -378,6 +501,16 @@ void StateHelper::initPiAndPiInv(Tour& pi_tour, vector<int>& pi_vec, vector<int>
   for(int pivi=1;pivi<n+1;pivi++){
     pi_inv_vec[pi_vec[pivi]]=pivi;
   } 
+}
+
+void StateHelper::initPiInv(Tour& pi_tour, vector<int>& pi_inv_vec){
+  int n = pi_tour.getSize();
+  pi_inv_vec.clear();
+  pi_inv_vec.assign(n+1,0);
+
+  for(int i_order = 1; i_order < n+1; i_order++){
+    pi_inv_vec[pi_tour.pi(i_order)] = i_order;
+  }
 }
 
 void StateHelper::eraseDummiesInPiVec(vector<int>& pi_vec){
@@ -673,3 +806,21 @@ int Action::getSigma(){
 }
 
 //==== MDP ===+==================================
+MDP::MDP(State& s_prev, State& s_next, Action& a_prev, double r_prev, vector<double>& f_prev, LinearFittedQIteration& LinQ){
+  //unsigned int time;
+  //unsigned int epi;
+  //unsigned int step;
+  //State s_prev;
+  //State s_next;
+  //Action a_prev;
+  //double r_prev;
+  //vector<double> f_prev;
+  this->time = LinQ.time;
+  this->epi = LinQ.epi;
+  this->step = LinQ.step;
+  this->s_prev = s_prev;
+  this->s_next = s_next;
+  this->a_prev = a_prev;
+  this->r_prev = r_prev;
+  this->f_prev = f_prev;
+}

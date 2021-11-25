@@ -46,7 +46,8 @@ class Arguments {
     unsigned int KSMP ; // the number of sample node in feature mapping (state part)
     unsigned int OMEGA ; // the number of largest sum of edge weight in feature mapping (state part)
     unsigned int ASMP ; // the number of samples about every sigma in Action's greedy algorithm
-    int SIGMAMAX ; // maximum length of action
+    unsigned int SIGMAMAX ; // maximum length of action
+    unsigned int F3IMAX ; // maximum number of edges to check on calculating state feature's f_(3+i)
 
     Graph V; // set of nodes
   public :

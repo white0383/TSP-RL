@@ -12,7 +12,7 @@
 class LinearFittedQIteration{
   public:
     vector<double> weights;
-    vector<MDP> replayBuffer;
+    deque<MDP> replayBuffer;
 
     // real world's computation time
     time_t startTimeT;
@@ -42,6 +42,7 @@ class LinearFittedQIteration{
     double bestDist;
     vector<unsigned int> lastTimeNodeActioned;
     deque<double> distQueue; // maximum length is THETA in tspArgs
+    vector<int> V_smp;
 
   public:
     LinearFittedQIteration(const Arguments& tspArgs);
@@ -56,6 +57,19 @@ class LinearFittedQIteration{
      * return true when algorithm should be terminated
      */
     bool checkTerminationCondition(const Arguments& tspArgs);   
+
+    /**
+     * finish a time step, and update model's internal infomation
+     * 
+     * 1. update replayBuffer
+     * 2. update Tau (LastTimeNodeActioned)
+     * 3. update bestInfos
+     * 4. update distQ
+     * 5. s_prev = s_next
+     * 6. this->time ++
+     */
+    void updateInfo(MDP& mdp, State& s_prev, State& s_next, const Arguments& tspArgs);
+
 
     /**
      * Push_back prevMDP into ReplayBuffer
@@ -92,7 +106,7 @@ class LinearFittedQIteration{
      * push_back dist_next into distQueue
      * and pop_front if its size is bigger thand THETA
      */
-    void updateDistQueue(double dist_piStar_next, const Arguments& tstArgs);
+    void updateDistQueue(double dist_piStar_next, const Arguments& tspArgs);
     
     /**
      * update weights vector using least square method
@@ -127,7 +141,7 @@ class DataSet{
     vector< vector<double> > featureVectors; // model's input data
 
   public:
-    DataSet(const Arguments& tspArgs, deque<MDP>& replayBuffer, const vector<double> weights_old);
+    DataSet(const Arguments& tspArgs, deque<MDP>& replayBuffer, const vector<double> weights);
 };
 
 
