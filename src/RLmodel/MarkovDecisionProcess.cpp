@@ -30,21 +30,11 @@ double MDPHelper::getReward(State& s_next, LinearFittedQIteration& LinQ, const A
   double dist_star = s_next.distPiStar;
   double dist_best = LinQ.bestDist;
 
-  //cout << "star : " << dist_star << endl;
-  //cout << "best : " << dist_best << endl;
-
   rst_reward += normalImproveReLu(dist_star, dist_best);
-
-  //cout << " add : " << normalImproveReLu(dist_star, dist_best) << endl;
 
   for(int l=1;l <= LinQ.distQueue.size();l++){
     dist_l = *(LinQ.distQueue.rbegin() + l - 1);
-
-    //cout << "dstl : " << dist_l << endl;
-
     rst_reward += pow(tspArgs.ALPHA,l) * normalImproveReLu(dist_star,dist_l);
-
-    //cout << "add : " << pow(tspArgs.ALPHA,l) * normalImproveReLu(dist_star,dist_l) << endl;
   }
 
   return rst_reward;
@@ -53,7 +43,6 @@ double MDPHelper::getReward(State& s_next, LinearFittedQIteration& LinQ, const A
 pair<double,double> MDPHelper::subPerturb(vector<int>& pi, vector<int>& pi_inv, const pair<int,int>& swap, const Arguments& tspArgs){
   int p_index = swap.first;
   int q_index = swap.second;
-  //cout << "p : " << p_index << " q : " << q_index << endl;
 
   //Exception Check : when p >= q
   if(p_index >= q_index){
@@ -64,8 +53,6 @@ pair<double,double> MDPHelper::subPerturb(vector<int>& pi, vector<int>& pi_inv, 
 
   int i_order = pi_inv[p_index];
   int j_order = pi_inv[q_index];
-  //if((i_order == 1)|| (j_order==1) || (i_order == tspArgs.V.getN()) || (j_order == tspArgs.V.getN())) 
-  //cout << "i : " << i_order << " j : " << j_order << endl;
 
   pair<double,double> rstPair = MDPHelper::getAddedDroppedWeights(pi, pi_inv, swap, tspArgs);
 
@@ -124,48 +111,20 @@ pair<double,double> MDPHelper::getAddedDroppedWeights(vector<int>& pi, vector<in
   ScaledNode j_minus_snode = tspArgs.V.getScaledNode(pi[j_order-1]);
   ScaledNode j_snode = tspArgs.V.getScaledNode(pi[j_order]);
   ScaledNode j_plus_snode = tspArgs.V.getScaledNode(pi[j_order+1]);
-  //cout << "pi : ";
-  //for(auto foo : pi) cout << foo << " ";
-  //cout << endl;
-  //i_minus_snode.printScaledNode();
-  //i_snode.printScaledNode();
-  //i_plus_snode.printScaledNode();
-  //j_minus_snode.printScaledNode();
-  //j_snode.printScaledNode();
-  //j_plus_snode.printScaledNode();
 
   double addedDist = 0;
   addedDist += dist(i_minus_snode,j_snode);
-  //cout << " add : " << i_minus_snode.index << ", " << j_snode.index;
-  //cout << " dist : " << dist(i_minus_snode,j_snode) << endl;
   if(pqAreAdj == false) addedDist += dist(j_snode,i_plus_snode);
-  //cout << " add : " << j_snode.index << ", " << i_plus_snode.index;
-  //cout << " dist : " << dist(j_snode,i_plus_snode) << endl;
   if(pqAreAdj == false) addedDist += dist(j_minus_snode,i_snode);
-  //cout << " add : " << j_minus_snode.index << ", " << i_snode.index;
-  //cout << " dist : " << dist(j_minus_snode,i_snode) << endl;
   addedDist += dist(i_snode, j_plus_snode);
-  //cout << " add : " << i_snode.index << ", " << j_plus_snode.index;
-  //cout << " dist : " << dist(i_snode,j_plus_snode) << endl;
-  //cout << "total add : " << addedDist << endl;
 
   double droppedDist = 0;
   droppedDist += dist(i_minus_snode,i_snode);
-  //cout << " drop : " << i_minus_snode.index << ", " << i_snode.index;
-  //cout << " dist : " << dist(i_minus_snode,i_snode) << endl;
   if(pqAreAdj == false) droppedDist += dist(i_snode,i_plus_snode);
-  //cout << " drop : " << i_snode.index << ", " << i_plus_snode.index;
-  //cout << " dist : " << dist(i_snode,i_plus_snode) << endl;
   if(pqAreAdj == false) droppedDist += dist(j_minus_snode,j_snode);
-  //cout << " drop : " << j_minus_snode.index << ", " << j_snode.index;
-  //cout << " dist : " << dist(j_minus_snode,j_snode) << endl;
   droppedDist += dist(j_snode, j_plus_snode);
-  //cout << " drop : " << j_snode.index << ", " << j_plus_snode.index;
-  //cout << " dist : " << dist(j_snode,j_plus_snode) << endl;
-  //cout << "total drop : " << droppedDist << endl;
 
   pair<double,double> rstPair = make_pair(addedDist, droppedDist);
-  //cout << "change : " << addedDist - droppedDist << endl;
 
   return rstPair; 
 }
@@ -269,6 +228,7 @@ vector<double> MDPHelper::calcF3is(State& s, LinearFittedQIteration& LinQ, const
   Tour& piStar = s.pi_star;
   const Graph& g = tspArgs.V;
   vector<int>& V_smp = LinQ.V_smp;
+
   // the number of top tspArgs.F3IMAX shortest edges incident to c_i (index of node)
   // which are included in piStar
   double countEdge = 0;
@@ -344,7 +304,7 @@ vector<double> MDPHelper::getFeatureVector(State& s, Action& a, LinearFittedQIte
   vector<double> stateFeatures = MDPHelper::getStateFeatures(s,LinQ,tspArgs);
   for(double stateFeature : stateFeatures) rst_featureVector.emplace_back(stateFeature);
 
-  //action features
+  //action features  
   vector<double> actionFeatures = MDPHelper::getActionFeatures(a,s,LinQ,tspArgs);
   for(double actionFeature : actionFeatures) rst_featureVector.emplace_back(actionFeature);
 
@@ -409,12 +369,11 @@ State::State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const 
 
   this->distPiPastStar = s_prev.distPiStar;
   if(s_prev.distPiStar < LinQ.bestDist){
-    cout << "update " << s_prev.time << " : ";
+    cout << "update " << s_prev.time << " : " << endl;
     this->bestTime = s_prev.time;
   } else {
     this->bestTime = LinQ.bestTime;
   };
-  cout << "time : " << s_prev.time << " BestTime : " << this->bestTime << endl;
 }
 
 Tour State::getPi(){
@@ -436,10 +395,6 @@ Tour State::perturb(Action& a, const Arguments& tspArgs){
     vari_scost += addDropWeightsInfo.first;
     vari_scost -= addDropWeightsInfo.second;
   }
-  //cout << "pi2 : ";
-  //for(auto foo : pi_star_vec)cout << foo << " ";
-  //cout << endl;
-  //cout << "total change : " << vari_scost<<endl;
 
   //Then, pi_star_vec represent perturbed new Tour
   StateHelper::eraseDummiesInPiVec(pi_star_vec);

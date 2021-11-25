@@ -1,15 +1,17 @@
 #include <vector>
 #include "./fitLinearQ.h"
 #include "/usr/local/include/lapacke.h"
+#include <stdlib.h>
 
 using namespace std;
 
 vector<double> fitLinearQ(const vector< vector<double> >& X, const vector<double>& rho){
   int T = rho.size();
   int K = X[0].size();
+  int bSize = (T > (K+1)) ? T : K+1;
 
   double *A = new double[(K+1) * T];
-  double *b = new double[T];
+  double *b = new double[bSize];
 
   for(int i=0;i<T;i++){
     //set A's ist column

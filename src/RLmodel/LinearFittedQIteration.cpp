@@ -90,7 +90,6 @@ namespace LinQHelper {
 
 //===================== in LinQ.Learn ==================================
 
-
 }
 
 //========= LinQ Member ==============================================
@@ -117,89 +116,29 @@ LinearFittedQIteration::LinearFittedQIteration(const Arguments& tspArgs){
 };
 
 void LinearFittedQIteration::learn(const Arguments& tspArgs){
-  cout << "learn is fun" << endl;
+  cout << "Learning start" << endl;
   Tour pi_init = generateInitialSolution(tspArgs);
   pi_init.setScaledCost(tspArgs.V);
   State s_prev = State(pi_init,tspArgs);
   this->distQueue.push_back(s_prev.distPiStar);
   this->bestTour = s_prev.pi_star;
 
-  //bool testOK = true;
-  //int failCount = 0;
-
   while(LinearFittedQIteration::checkTerminationCondition(tspArgs) == false){
     for(this->step = 1;this->step <= this->MAXstep;this->step++){
-      cout << "#####time : " << this->time << " begin " << endl;
+      cout << "time : " << this->time << endl;
       Action a_prev = Action(s_prev, *this, tspArgs);
       State s_next = State(s_prev, a_prev, *this,tspArgs);
-
-      /* perturb test
-      Tour pi_cp = s_prev.getPi();
-      Tour pistar_cp = s_prev.getPiStar();
-      pi_cp.setScaledCost(tspArgs.V);
-      pistar_cp.setScaledCost(tspArgs.V);
-      double pi_scost = s_prev.pi.getScaledCost();
-      double pistar_scost = s_prev.pi_star.getScaledCost();
-      double pi_real_scost = pi_cp.getScaledCost();
-      double pistar_real_scost = pistar_cp.getScaledCost();
-      //double to_gap = pi_scost - pistar_scost;
-      //double to_real_gap = pi_real_scost - pistar_real_scost;
-      //cout << "2opt : mine : " << to_gap << endl;
-      //cout << "       real : " << to_real_gap << endl;
-      Tour pinext_cp = s_next.getPi();
-      pinext_cp.setScaledCost(tspArgs.V);
-      double pinext_scost = s_next.pi.getScaledCost();
-      double pinext_real_scost = pinext_cp.getScaledCost();
-      double pt_gap = pinext_scost - pistar_scost;
-      double pt_real_gap = pinext_real_scost - pistar_real_scost;
-      if(abs(pt_gap - pt_real_gap) >= 0.001) {
-        testOK = false;
-        failCount ++;
-        cout << "perturb ERROR!!!" << endl;
-        cout << "pi : mine : " << pi_scost << endl;
-        cout << "     real : " << pi_real_scost << endl;
-        cout << "ps : mine : " << pistar_scost << endl;
-        cout << "     real : " << pistar_real_scost << endl;
-        cout << "pert : mine : " << pt_gap << endl;
-        cout << "       real : " << pt_real_gap << endl;
-        exit(1);
-      } else {
-        //cout << "perturb OOKKK!!!" << endl;
-      }
-      */
-      
       double r_prev = MDPHelper::getReward(s_next,*this,tspArgs);
-
-      /* State Feature test
-      vector<double> f_s = MDPHelper::getStateFeatures(s_prev,*this,tspArgs);
-      cout << "STATE features" << endl;
-      s_prev.pi_star.printTour();
-      cout << "dimention : " << f_s.size() << endl;
-      cout << "f1 : " << f_s.at(0) << " f2 : " << f_s.at(1) << " f3 : " << f_s.at(2) << endl;
-      cout << "f3i : " ;
-      for(int ii = 0; ii < tspArgs.KSMP ; ii++) cout << f_s.at(3+ii) << " ";
-      cout << endl;
-      cout << "f3KSMPj : ";
-      for(int ii = 0; ii < tspArgs.OMEGA ; ii++) cout << f_s.at(3+tspArgs.KSMP+ii) << " ";
-      cout << endl;
-      */
-
       vector<double> f_prev = MDPHelper::getFeatureVector(s_prev, a_prev, *this, tspArgs);
       MDP mdp_prev = MDP(s_prev, s_next, a_prev, r_prev, f_prev, *this);
       this->updateInfo(mdp_prev, s_prev, s_next, tspArgs);
     }
     DataSet dataset = DataSet(tspArgs, *this);
-    //this->updateWeights(dataset);
+    this->updateWeights(dataset);
     this->epi++;
   }
 
-  //if(testOK == true){
-  //  cout << "test OK" << endl;
-  //} else {
-  //  cout << "test Fail" << endl;
-  //  cout << "fail num : " << failCount << endl;
-  //}
-
+  cout << "Learning finish" << endl;
 }
 
 bool LinearFittedQIteration::checkTerminationCondition(const Arguments& tspArgs){
