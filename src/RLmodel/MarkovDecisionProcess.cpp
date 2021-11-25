@@ -297,20 +297,35 @@ State::State(Tour _pi, Tour _pi_star){
   }
 };
 
-State::State(Tour& pi, unsigned int time, const Arguments& tspArgs){
+// Operated only when time == 1
+State::State(Tour& pi, const Arguments& tspArgs){
   this->pi = pi;
   this->pi_star = searchLocalOpt(tspArgs, pi);
   this->distPiStar = this->pi_star.getScaledCost();
-  this->time = time;
+  //this->time = 1; 
+
+  //this->distPiPastStar = DBL_MAX;
+  //this->bestTime = 0;
 }
 
-State::State(State& s_prev, Action& a_prev, unsigned int time, const Arguments& tspArgs){
+State::State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const Arguments& tspArgs){
   this->pi = s_prev.perturb(a_prev, tspArgs);
   this->pi_star = searchLocalOpt(tspArgs, this->pi);
   this->distPiStar = this->pi_star.getScaledCost();
-  this->time = time + 1;
-}
+  this->time = s_prev.time + 1;
 
+  this->distPiPastStar = s_prev.distPiStar;
+  if(s_prev.distPiStar < LinQ.bestDist){
+    //TMP
+    LinQ.bestDist = s_prev.distPiStar;
+    LinQ.bestTime = s_prev.time;
+    //TMP
+    this->bestTime = s_prev.time;
+  } else {
+    this->bestTime = LinQ.bestTime;
+  };
+  cout << "time : " << this->time << " BestTime : " << this->bestTime << endl;
+}
 
 Tour State::getPi(){
   return this->pi;
@@ -447,6 +462,12 @@ void ActionHelper::updateActionFeatures(vector<double>& actFeatures, vector<int>
   pi_vec[j_order] = p_index;
   pi_inv_vec[q_index] = i_order;
   pi_inv_vec[p_index] = j_order;
+
+  // Exception handling
+  if(i_order == 1) pi_vec.back() = q_index;
+  if(j_order == 1) pi_vec.back() = p_index;
+  if(i_order == tspArgs.V.getN()) pi_vec.front() = q_index;
+  if(j_order == tspArgs.V.getN()) pi_vec.front() = p_index;
 }
 
 vector<pair<int,int> > ActionHelper::genFullGreedy(Tour& pi_star, LinearFittedQIteration& LinQ, const Arguments& tspArgs){

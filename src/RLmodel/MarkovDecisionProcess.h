@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <utility> //std::pair
+#include <cfloat> // DBL_MAX
+
 #include "../model/Tour.h"
 #include "../model/Arguments.h"
 
@@ -278,6 +280,16 @@ namespace MDPHelper{
 
   //vector<double> getStateFeatures(State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
+  /**
+   * return f(s,a) = K+1 dimentional double vector
+   * 
+   * let f_i = f(s,a) [i] (i = 0 ~ K)
+   * 
+   * f_0 = 1 -> represent constance in weight vector
+   * f_1 ~ f_(3 + KSMP + OMEGA) -> state features
+   *    f_1 = s.distPiStar
+   *    f_2 = s.time - LinQ.bestTime
+   */
   //vector<double> getFeatureVector(Action& a, State& s, LinearFittedQIteration& LinQ, const Arguments& tspArgs)
 
   /**
@@ -316,14 +328,41 @@ class State{
   public: //instances
     Tour pi;
     Tour pi_star;
-    double distPiStar = 0;
-    unsigned int time = 0;
+    double distPiStar = 0.0;
+    unsigned int time = 1;
+    
+    //#### for feature mapping
+    /**
+     * it is  dist(pi_star_{time = this->time-1})
+     * default value is DBL_MAX ( = dist(piStar_0))
+     * 
+     * for f_3
+     */
+    double distPiPastStar = DBL_MAX; 
+
+    /**
+     * t of the smallest dist(piStar_t) (t < this.time)
+     * default value is 0 (time of state_0)
+     * 
+     * when State is constructed by State(s_prev,a_prev,_time,LinQ,args),
+     * new State's time will be _time+1.
+     * And LinQ.bestTime is that of s_prev, 
+     * which is t of the smallest dist(piStar_t) (t < _time ( = this.time-1))
+     * So, if s_prev.distPiStat < LinQ.bestDist 
+     *        then this.bestTime = _time ( = s_prev.time);
+     *     else (LinQ.bestDist is the best solution's dist in t = 1 ~ s_prev.time)
+     *        then this.bestTime = LinQ.bestTime
+     * 
+     * for f_2 
+     */
+    unsigned int bestTime = 0;
+
   
   public:
     // constructor 
     State(Tour pi, Tour pi_star); 
-    State(Tour& pi, unsigned int time, const Arguments& tspArgs);
-    State(State& s_prev, Action& a_prev, unsigned int time, const Arguments& tspArgs);
+    State(Tour& pi, const Arguments& tspArgs);
+    State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const Arguments& tspArgs);
 
     // getter 
     Tour getPi();

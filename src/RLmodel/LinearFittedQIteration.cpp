@@ -15,7 +15,7 @@ using namespace std;
 //========= LinQHelper ===============================================
 namespace LinQHelper {
 
-//===================== LinQ Constructor =============================
+//===================== in LinQ Constructor =============================
   /**
    * Generate weight vecotr which has random double-type values
    * there values are included in [ (+-) tspArgs.WEIGHTINTERVAL/2]
@@ -81,7 +81,7 @@ namespace LinQHelper {
     return rstDeq;
   }
 
-//===================== LinQ.Learn ==================================
+//===================== in LinQ.Learn ==================================
 
 
 }
@@ -112,7 +112,7 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
   cout << "learn is fun" << endl;
   Tour pi_init = generateInitialSolution(tspArgs);
   pi_init.setScaledCost(tspArgs.V);
-  State s_prev = State(pi_init,this->time,tspArgs);
+  State s_prev = State(pi_init,tspArgs);
   this->distQueue.push_back(s_prev.distPiStar);
 
   //bool testOK = true;
@@ -123,7 +123,7 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
       cout << "#####time : " << this->time << " begin " << endl;
       Action a_prev = Action(s_prev, *this, tspArgs);
       //cout << "sigma : " << a_prev.getSigma() << endl;
-      State s_next = State(s_prev, a_prev, this->time, tspArgs);
+      State s_next = State(s_prev, a_prev, *this,tspArgs);
 
       /* perturb test
       Tour pi_cp = s_prev.getPi();
@@ -168,7 +168,7 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
       //this->updateModelInfo(mdp_prev, tspArgs, s_prev, s_next)
       
       //FOR DEBUG
-      cout << "#####time : " << this->time << " finish " << endl << endl;
+      //cout << "#####time : " << this->time << " finish " << endl << endl;
       this->time++;
       this->distQueue.push_back(s_prev.distPiStar);
     }
