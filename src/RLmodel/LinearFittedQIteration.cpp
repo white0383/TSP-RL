@@ -3,7 +3,8 @@
 #include "../model/Arguments.h"
 #include "../solver/initial_solution/GenerateInitialSolution.h"
 #include "../helper/RandVec.h"
-#include "../helper/fitLinearQ.h"
+//#include "../helper/fitLinearQ.h"
+#include "../helper/fitLP.h"
 
 #include <ctime>
 #include <vector>
@@ -116,7 +117,11 @@ LinearFittedQIteration::LinearFittedQIteration(const Arguments& tspArgs){
 };
 
 void LinearFittedQIteration::learn(const Arguments& tspArgs){
-  cout << "Learning start" << endl;
+  //cout << "===== Learning start =====" << endl;
+
+  // TMP
+  //this->printWeights();
+
   Tour pi_init = generateInitialSolution(tspArgs);
   pi_init.setScaledCost(tspArgs.V);
   State s_prev = State(pi_init,tspArgs);
@@ -125,7 +130,6 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
 
   while(LinearFittedQIteration::checkTerminationCondition(tspArgs) == false){
     for(this->step = 1;this->step <= this->MAXstep;this->step++){
-      cout << "time : " << this->time << endl;
       Action a_prev = Action(s_prev, *this, tspArgs);
       State s_next = State(s_prev, a_prev, *this,tspArgs);
       double r_prev = MDPHelper::getReward(s_next,*this,tspArgs);
@@ -134,11 +138,16 @@ void LinearFittedQIteration::learn(const Arguments& tspArgs){
       this->updateInfo(mdp_prev, s_prev, s_next, tspArgs);
     }
     DataSet dataset = DataSet(tspArgs, *this);
-    this->updateWeights(dataset);
+    // tmp
+    //dataset.printInfo();
+    if(this->epi < 5 || this->epi > 45)this->updateWeights(dataset);
+    //cout << "Finish epi " << this->epi << endl;
     this->epi++;
+
+    this->printWeights();
   }
 
-  cout << "Learning finish" << endl;
+  //cout << "Learning finish" << endl;
 }
 
 bool LinearFittedQIteration::checkTerminationCondition(const Arguments& tspArgs){
@@ -175,6 +184,7 @@ void LinearFittedQIteration::updateInfo(MDP& mdp, State& s_prev, State& s_next, 
 
   // time inscrease
   this->time++;
+  this->spendSec = (double)(clock() - this->startTimeT) / CLOCKS_PER_SEC;
 }
 
 void LinearFittedQIteration::updateReplayBuffer(MDP& prevMDP,const Arguments& tspArgs){
@@ -195,6 +205,7 @@ void LinearFittedQIteration::updateBestInfos(State& s_prev){
   double dist_piStar_prev = s_prev.distPiStar;
 
   if(dist_piStar_prev < this->bestDist){
+    //cout << "UPDATE! : time " << this->time << " " << this-> bestDist << " -> " << dist_piStar_prev << endl;
     this->bestDist = dist_piStar_prev;
     this->bestTime = this->time;
     this->bestTour = s_prev.pi_star;
@@ -209,9 +220,23 @@ void LinearFittedQIteration::updateDistQueue(double dist_piStar_next, const Argu
 }
 
 void LinearFittedQIteration::updateWeights(DataSet& dataSet){
-  this->weights = fitLinearQ(dataSet.featureVectors, dataSet.targetValues);
+  //this->weights = fitLinearQ(dataSet.featureVectors, dataSet.targetValues);
+  this->weights = fitLP(dataSet.featureVectors, dataSet.targetValues);
 }
 
+void LinearFittedQIteration::printWeights(){
+  cout << "EPI : " << this->epi;
+  cout << "dim : " << this->weights.size() << endl;
+  //cout << "Weights : ";
+  //for(auto foo : this->weights) cout << foo << " ";
+  //cout << endl;
+  cout << "None zero :" << endl;
+  for(int i = 0; i < this->weights.size() ; i++){
+    if(this->weights.at(i) != 0){
+      cout << "i : " <<  i << " value : " << this->weights.at(i) << endl;
+    }
+  }
+}
 
 //========= DataSet Member ===========================================
 DataSet::DataSet(const Arguments& tspArgs, LinearFittedQIteration& LinQ){
@@ -234,4 +259,20 @@ DataSet::DataSet(const Arguments& tspArgs, LinearFittedQIteration& LinQ){
     this->targetValues.emplace_back(targetValue);
     this->featureVectors.emplace_back(f_sampled);
   }
+}
+
+void DataSet::printInfo(){
+  cout << "======= Target Value :: ";
+  for(auto foo : this->targetValues) cout << foo << " ";
+  cout << endl << endl;
+
+  cout << "======= Feature Matrix ::" << endl;
+  int fv_count = 1;
+  for(auto fv : this->featureVectors){
+    //cout << "===FV " << fv_count++ << " : ";
+    cout << "str_fv" << fv_count++ << " = '";
+    for(auto f : fv) cout << f << " ";
+    cout << "'"<< endl << endl;
+  }
+
 }

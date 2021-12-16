@@ -217,7 +217,7 @@ Arguments::Arguments(vector<string>& stringArgs, vector<unsigned int>& integerAr
     this->OMEGA = min(this->V.getN(),100);
     this->K = 3+ this->KSMP + this->OMEGA + 6;
     this->ASMP = min(this->V.getN(),100);
-    this->SIGMAMAX = min(this->V.getN()/10, 100);
+    this->SIGMAMAX = 15;//floor(log(this->V.getN()) / log(2));//min(this->V.getN()/10, 100);
     this->F3IMAX = floor(log(this->V.getN()) / log(2));
 
   } else {

@@ -3,8 +3,10 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
-                
+                "${default}",
+                "${workspaceFolder}/**",
+                "/Applications/CPLEX_Studio1210/cplex/include/",
+                "/Applications/CPLEX_Studio1210/concert/include/"
             ],
             "defines": [],
             "macFrameworkPath": [

@@ -369,7 +369,7 @@ State::State(State& s_prev, Action& a_prev, LinearFittedQIteration& LinQ, const 
 
   this->distPiPastStar = s_prev.distPiStar;
   if(s_prev.distPiStar < LinQ.bestDist){
-    cout << "update " << s_prev.time << " : " << endl;
+    //cout << "update " << s_prev.time << " : " << endl;
     this->bestTime = s_prev.time;
   } else {
     this->bestTime = LinQ.bestTime;

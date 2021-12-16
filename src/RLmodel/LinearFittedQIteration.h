@@ -13,7 +13,7 @@ class LinearFittedQIteration{
   public:
     vector<double> weights;
     deque<MDP> replayBuffer;
-
+    
     // real world's computation time
     time_t startTimeT;
     double spendSec;
@@ -120,6 +120,7 @@ class LinearFittedQIteration{
     vector<double> getWeights();
 
     //For Debugging
+    void printWeights();
 };
 
 
@@ -146,6 +147,10 @@ class DataSet{
   public:
     DataSet() = default;
     DataSet(const Arguments& tspArgs, LinearFittedQIteration& LinQ);
+
+  // for Debugging
+  public:
+    void printInfo();
 };
 
 
